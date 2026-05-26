@@ -1,0 +1,6 @@
+# Q values for ideal cubic beta-cristobalite with a = 7.15 Angstrom.
+# q_hkl = 2*pi*sqrt(h^2+k^2+l^2)/a.
+# lambda(Cu K-alpha) = 1.5406 Angstrom; 2theta = 2*asin(lambda*q/(4*pi)).
+# h k l     Q(Angstrom^-1)     2theta(deg)
+1 1 1       1.52207            21.50
+0 2 2       2.48553            35.48

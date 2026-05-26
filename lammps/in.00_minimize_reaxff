@@ -1,0 +1,28 @@
+# Minimize beta-cristobalite SiO2 with ReaxFF.
+# Run from project root:
+#   lmp -in lammps/in.00_minimize_reaxff
+
+units           real
+atom_style      charge
+boundary        p p p
+newton          on
+
+read_data       structures/beta_cristobalite_192.data
+
+neighbor        2.0 bin
+neigh_modify    every 10 delay 0 check yes
+
+pair_style      reaxff NULL safezone 1.6 mincap 100
+pair_coeff      * * potentials/ffield.reax.SiOH Si O
+
+# Charge equilibration is required for normal ReaxFF electrostatics.
+fix             qeq all qeq/reaxff 1 0.0 10.0 1.0e-6 reaxff
+
+thermo          10
+thermo_style    custom step temp pe etotal press vol density atoms
+
+min_style       cg
+minimize        1.0e-4 1.0e-6 1000 10000
+
+write_data      structures/beta_cristobalite_192_min.data
+write_restart   outputs/beta_cristobalite_192_min.restart
