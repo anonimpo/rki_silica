@@ -1,21 +1,6 @@
 LAMMPS (29 Aug 2024)
 OMP_NUM_THREADS environment is not set. Defaulting to 1 thread. (src/comm.cpp:98)
   using 1 OpenMP thread(s) per MPI task
-# Equilibrate liquid silica near target temperature using ReaxFF.
-# Run after in.01_melt_reaxff.
-
-units           real
-atom_style      charge
-boundary        p p p
-newton          on
-
-variable        T equal 2400.0
-variable        P equal 1.0
-variable        dt equal 0.25
-variable        nsteps equal 80000      # 20 ps at 0.25 fs; extend for production
-variable        dumpfreq equal 1000
-
-read_data       structures/liquid_sio2_after_melt.data
 Reading data file ...
   orthogonal box = (-0.13298298 -0.13298298 -0.13298298) to (14.432983 14.432983 14.432983)
   2 by 2 by 2 MPI processor grid
@@ -24,71 +9,15 @@ Reading data file ...
   reading velocities ...
   192 velocities
   read_data CPU = 0.004 seconds
-
-neighbor        2.0 bin
-neigh_modify    every 10 delay 0 check yes
-
-pair_style      reaxff NULL safezone 1.6 mincap 100
-pair_coeff      * * potentials/ffield.reax.SiOH Si O
 WARNING: Changed valency_val to valency_boc for X (src/REAXFF/reaxff_ffield.cpp:294)
-fix             qeq all qeq/reaxff 1 0.0 10.0 1.0e-6 reaxff
-
-timestep        ${dt}
-timestep        0.25
-fix             ens all npt temp ${T} ${T} 100.0 iso ${P} ${P} 10000.0
-fix             ens all npt temp 2400 ${T} 100.0 iso ${P} ${P} 10000.0
-fix             ens all npt temp 2400 2400 100.0 iso ${P} ${P} 10000.0
-fix             ens all npt temp 2400 2400 100.0 iso 1 ${P} 10000.0
-fix             ens all npt temp 2400 2400 100.0 iso 1 1 10000.0
-
-thermo          100
-thermo_style    custom step time temp pe ke etotal press vol density
-
-dump            d1 all custom ${dumpfreq} outputs/equil_liquid_reaxff.lammpstrj id type q x y z
-dump            d1 all custom 1000 outputs/equil_liquid_reaxff.lammpstrj id type q x y z
-dump_modify     d1 sort id
-
-run             ${nsteps}
-run             80000
 
 CITE-CITE-CITE-CITE-CITE-CITE-CITE-CITE-CITE-CITE-CITE-CITE-CITE
 
 Your simulation uses code contributions which should be cited:
-
 - Type Label Framework: https://doi.org/10.1021/acs.jpcb.3c08419
-
-@Article{Gissinger24,
- author = {Jacob R. Gissinger, Ilia Nikiforov, Yaser Afshar, Brendon Waters, Moon-ki Choi, Daniel S. Karls, Alexander Stukowski, Wonpil Im, Hendrik Heinz, Axel Kohlmeyer, and Ellad B. Tadmor},
- title = {Type Label Framework for Bonded Force Fields in LAMMPS},
- journal = {J. Phys. Chem. B},
- year =    2024,
- volume =  128,
- number =  13,
- pages =   {3282–-3297}
-}
-
 - pair reaxff command: doi:10.1016/j.parco.2011.08.005
-
-@Article{Aktulga12,
- author = {H. M. Aktulga and J. C. Fogarty and S. A. Pandit and A. Y. Grama},
- title = {Parallel Reactive Molecular Dynamics: {N}umerical Methods and Algorithmic Techniques},
- journal = {Parallel Computing},
- year =    2012,
- volume =  38,
- number =  {4--5},
- pages =   {245--259}
-}
-
 - fix qeq/reaxff command: doi:10.1016/j.parco.2011.08.005
-
-@Article{Aktulga12,
- author = {H. M. Aktulga and J. C. Fogarty and S. A. Pandit and A. Y. Grama},
- title = {Parallel Reactive Molecular Dynamics: {N}umerical Methods and Algorithmic Techniques},
- journal = {Parallel Computing},
- year =    2012,
- volume =  38,
- pages =   {245--259}
-}
+The log file lists these citations in BibTeX format.
 
 CITE-CITE-CITE-CITE-CITE-CITE-CITE-CITE-CITE-CITE-CITE-CITE-CITE
 
@@ -109,6 +38,10 @@ Neighbor list info ...
       pair build: copy
       stencil: none
       bin: none
+Setting up Verlet run ...
+  Unit style    : real
+  Current step  : 0
+  Time step     : 0.25
 Per MPI rank memory allocation (min/avg/max) = 42.6 | 42.86 | 43.16 Mbytes
    Step          Time           Temp          PotEng         KinEng         TotEng         Press          Volume        Density    
          0   0              4516.5605     -26358.594      2571.4347     -23787.159      463.13046      3090.4226      2.0661991    
@@ -938,11 +871,6 @@ Total # of neighbors = 87544
 Ave neighs/atom = 455.95833
 Neighbor list builds = 607
 Dangerous builds = 0
-
-unfix           ens
-undump          d1
-write_data      structures/liquid_sio2_equilibrated_2400K.data
 System init for write_data ...
-write_restart   outputs/liquid_sio2_equilibrated_2400K.restart
 System init for write_restart ...
 Total wall time: 0:32:15
