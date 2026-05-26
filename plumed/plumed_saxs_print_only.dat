@@ -6,7 +6,7 @@ UNITS LENGTH=A TIME=fs ENERGY=kcal/mol
 MOLINFO STRUCTURE=structures/beta_cristobalite_192.pdb
 
 # q111 and q022 for beta-cristobalite with a=7.15 A.
-xrd: SAXS ATOMS=1-192 ATOMISTIC ABSOLUTE QVALUE1=1.52207 EXPINT1=1.0 QVALUE2=2.48553 EXPINT2=1.0
+xrd: SAXS ATOMS=1-192 ATOMISTIC QVALUE1=1.52207 EXPINT1=1.0 QVALUE2=2.48553 EXPINT2=1.0
 
 # The regex prints all q-components produced by SAXS; check COLVAR header/log for exact component names.
 PRINT ARG=(xrd\.q-.*) FILE=outputs/COLVAR_saxs_print.dat STRIDE=100

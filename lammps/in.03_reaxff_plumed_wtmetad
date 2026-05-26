@@ -23,11 +23,12 @@ pair_coeff      * * potentials/ffield.reax.SiOH Si O
 fix             qeq all qeq/reaxff 1 0.0 10.0 1.0e-6 reaxff
 
 timestep        ${dt}
-fix             ens all npt temp ${T} ${T} 100.0 iso ${P} ${P} 10000.0
 
-# PLUMED must be after timestep is set.
+# PLUMED must be after timestep is set and before any fixes that compute pressure internally (e.g. fix npt).
 # The included plumed_saxs_metad_approx.dat is an approximate stock-PLUMED path, not an exact paper CV.
 fix             plm all plumed plumedfile plumed/plumed_saxs_metad_approx.dat outfile logs/plumed_wtmetad.log
+
+fix             ens all npt temp ${T} ${T} 100.0 iso ${P} ${P} 10000.0
 
 thermo          100
 thermo_style    custom step time temp pe ke etotal press vol density

@@ -6,7 +6,7 @@ UNITS LENGTH=A TIME=fs ENERGY=kcal/mol
 MOLINFO STRUCTURE=structures/beta_cristobalite_192.pdb
 
 # q111 for beta-cristobalite with a=7.15 A. The paper biases s1=I(Q{111}).
-xrd: SAXS ATOMS=1-192 ATOMISTIC ABSOLUTE QVALUE1=1.52207 EXPINT1=1.0
+xrd: SAXS ATOMS=1-192 ATOMISTIC QVALUE1=1.52207 EXPINT1=1.0
 
 # Paper settings: bias factor 100; Gaussian every 1 ps; width 5 CV units; height 40 kJ/mol.
 # Here dt=0.25 fs, so PACE=4000 steps = 1 ps. 40 kJ/mol = 9.560 kcal/mol.
