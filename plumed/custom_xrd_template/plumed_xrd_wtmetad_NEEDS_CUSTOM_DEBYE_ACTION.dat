@@ -1,0 +1,24 @@
+# Niu-style WTMetaD with XRD/Debye intensity as collective variable.
+# -------------------------------------------------------------------
+# This file is intentionally a TEMPLATE, not a guaranteed stock-PLUMED input.
+# The DEBYE_STRUCTURE_FACTOR action is not part of a standard PLUMED build in
+# many installations. Use this only after you have compiled/loaded the exact
+# Debye/XRD custom action used in your reproduction workflow.
+
+UNITS LENGTH=A TIME=fs ENERGY=kcal/mol
+
+# Example only: adapt keyword names to the custom DebyeStructureFactor.cpp you compile.
+# LOAD FILE=DebyeStructureFactor.cpp
+# x111: DEBYE_STRUCTURE_FACTOR SPECIES=1-512 ACTIVE_Q=1.522 CUTOFF=10.5
+# x022: DEBYE_STRUCTURE_FACTOR SPECIES=1-512 ACTIVE_Q=2.486 CUTOFF=10.5
+#
+# metad: METAD ARG=x111 SIGMA=5.0 HEIGHT=9.560 PACE=4000 BIASFACTOR=100 TEMP=2300 FILE=HILLS_XRD GRID_MIN=0.0 GRID_MAX=500.0 GRID_BIN=1000 CALC_RCT
+# PRINT ARG=x111,x022,metad.bias,metad.rct,metad.rbias STRIDE=100 FILE=COLVAR_XRD
+# FLUSH STRIDE=100
+
+# Notes:
+# 1. With timestep 0.25 fs, PACE=4000 corresponds to one Gaussian every 1 ps.
+# 2. HEIGHT=9.560 kcal/mol corresponds to 40 kJ/mol.
+# 3. Validate GRID_MIN/GRID_MAX from an unbiased trajectory before production.
+# 4. q111=1.522 A^-1 and q022=2.486 A^-1 correspond approximately to beta-cristobalite
+#    with a=7.15 A.

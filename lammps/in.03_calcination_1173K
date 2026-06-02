@@ -1,0 +1,47 @@
+# Stage 03: calcination analogue: heat 300 K -> 1173 K and hold at 1173 K (900 degC).
+#   lmp -var phlabel pH7p0 -var baseatoms 1536 -in lammps/in.03_calcination_1173K
+
+clear
+units           real
+atom_style      charge
+boundary        p p p
+newton          on
+
+variable        phlabel       string pH7p0
+variable        baseatoms     string 1536
+variable        dt            equal 0.25
+variable        seed          equal 813579
+variable        nheat         equal 80000      # 20 ps default; increase for production
+variable        nhold         equal 120000     # 30 ps default; increase for production
+variable        rundir        string runs/${phlabel}_N${baseatoms}/03_calcination_1173K
+shell           mkdir -p ${rundir}
+log             ${rundir}/log.lammps
+
+read_data       runs/${phlabel}_N${baseatoms}/02_equilibrate_300K/eq300.data
+
+pair_style      reaxff NULL safezone 2.0 mincap 100
+pair_coeff      * * potentials/ffield.reax.SiOH Si O H
+neighbor        2.0 bin
+neigh_modify    every 10 delay 0 check yes
+fix             qeq all qeq/reaxff 1 0.0 10.0 1.0e-6 reaxff maxiter 200
+
+timestep        ${dt}
+thermo          1000
+thermo_style    custom step time temp press pe ke etotal vol density
+thermo_modify   flush yes lost warn
+
+dump            dmp all custom 2000 ${rundir}/calcination_1173K.lammpstrj id type q x y z vx vy vz
+dump_modify     dmp sort id
+
+fix             heat all npt temp 300.0 1173.0 100.0 iso 1.0 1.0 1000.0
+run             ${nheat}
+unfix           heat
+
+fix             hold all npt temp 1173.0 1173.0 100.0 iso 1.0 1.0 1000.0
+run             ${nhold}
+unfix           hold
+
+write_data      ${rundir}/calcined_1173K.data
+write_restart   ${rundir}/calcined_1173K.restart
+unfix           qeq
+undump          dmp

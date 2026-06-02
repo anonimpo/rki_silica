@@ -1,188 +1,157 @@
-# SiO2 crystallization workflow: LAMMPS ReaxFF + PLUMED
+# pH-Conditioned Silica Crystallization: ReaxFF + LAMMPS + PLUMED Workspace
 
-Paket ini menyiapkan struktur awal, input LAMMPS, input PLUMED, dan skrip analisis untuk memodelkan kristalisasi SiO2 menuju beta-cristobalite dengan inspirasi dari Niu et al. (2018). File force field `ffield.reax.SiOH` yang Anda unggah sudah disalin ke `potentials/`.
+Workspace ini disiapkan untuk mengembangkan riset lanjutan dari hasil skripsi tentang variasi pH sintesis silika sekam padi, lalu diuji dengan dinamika molekular reaktif. Paket ini memuat struktur awal, input LAMMPS berurutan, template PLUMED, skrip analisis XRD-Debye, skrip metrik struktur, dan daftar gambar untuk pembahasan.
 
-## Struktur direktori
+## 1. Struktur direktori
 
 ```text
-sio2_reaxff_plumed_project/
-├── README.md
-├── potentials/
-│   └── ffield.reax.SiOH
-├── structures/
-│   ├── beta_cristobalite_192.data
-│   ├── beta_cristobalite_192.pdb
-│   └── beta_cristobalite_192.xyz
-├── lammps/
-│   ├── in.00_minimize_reaxff
-│   ├── in.01_melt_reaxff
-│   ├── in.02_equilibrate_liquid_reaxff
-│   ├── in.03_reaxff_plumed_wtmetad
-│   └── in.04_reaxff_production_no_plumed
+ph_silica_reaxff_md_project/
+├── potentials/                     # ffield.reax.SiOH dari file yang Anda unggah
+├── structures/                      # prekursor pH 6,0–8,0 untuk N=192 dan N=1536
+├── lammps/                          # input LAMMPS Stage 01–05
 ├── plumed/
-│   ├── paper_xrd_cv_notes.md
-│   ├── plumed_saxs_metad_approx.dat
-│   ├── plumed_saxs_print_only.dat
-│   └── q_values_beta_cristobalite.txt
-├── scripts/
-│   ├── check_lammps_features.sh
-│   ├── make_beta_cristobalite.py
-│   ├── make_beta_cristobalite_ase.py
-│   ├── postprocess_existing_dump.sh
-│   ├── run_reaxff_pipeline.sh
-│   ├── run_reaxff_postprocess_workflow.sh
-│   ├── run_wtmetad.sh
-│   └── xrd_debye_cv.py
-├── outputs/
-│   └── xrd_initial.dat
-└── logs/
+│   ├── stock_localq6/               # PLUMED Local-Q6 fallback, stock PLUMED + crystallization module
+│   └── custom_xrd_template/         # template XRD/Debye CV ala Niu; perlu custom action
+├── scripts/                         # generator, runner, post-processing
+├── outputs/thesis_reference_plots/   # plot dari Tabel 4.1 skripsi
+├── docs/                            # catatan model, urutan definisi, dan daftar gambar
+├── runs/                            # output LAMMPS akan masuk ke sini
+└── analysis/                        # output post-processing akan masuk ke sini
 ```
 
-## Struktur awal
+## 2. Batasan penting model pH
 
-`structures/beta_cristobalite_192.data` berisi 192 atom: 64 Si + 128 O. Ini dibuat sebagai supercell 2x2x2 dari unit konvensional beta-cristobalite ideal, dengan parameter kisi `a = 7.15 Å`. Skala ini mengikuti ukuran kecil 192 atom yang dilaporkan pada paper untuk FES awal/ilustrasi.
+Force field `ffield.reax.SiOH` hanya memuat H/O/Si. Karena itu, workspace ini belum memodelkan HCl, NaOH, Na⁺, atau Cl⁻ secara eksplisit. pH direpresentasikan sebagai **kondisi prekursor terhidrasi/terdefek**: pH 7,0 diberi defek/hidrasi awal terendah, sedangkan pH 6,0 dan 8,0 lebih tinggi. Rancangan ini selaras dengan tren skripsi bahwa pH 7 menghasilkan kristalit terbesar dan FWHM terendah setelah kalsinasi.
 
-Untuk membuat ulang struktur tanpa dependency eksternal:
+Untuk asam-basa eksplisit, diperlukan force field tambahan yang tervalidasi untuk ion terkait, atau protokol hidronium/hidroksida yang menjaga netralitas total sistem.
+
+## 3. Cek lingkungan
 
 ```bash
-cd sio2_reaxff_plumed_project
-python3 scripts/make_beta_cristobalite.py --a 7.15 --reps 2 2 2 --out-prefix structures/beta_cristobalite_192
+cd ph_silica_reaxff_md_project
+LMP=lmp ./scripts/00_check_environment.sh
 ```
 
-Alternatif jika ASE terinstal:
+Minimal diperlukan:
+
+- LAMMPS dengan paket/fungsi `REAXFF` dan `fix qeq/reaxff`.
+- Untuk Stage 05: LAMMPS terhubung dengan PLUMED dan PLUMED memiliki module yang sesuai.
+- Python 3 dengan `numpy`, `pandas`, dan `matplotlib`.
+
+## 4. Membuat ulang struktur awal
+
+Struktur sudah disertakan. Untuk membuat ulang:
 
 ```bash
-pip install ase
-python3 scripts/make_beta_cristobalite_ase.py --a 7.15 --reps 2 2 2 --out-prefix structures/beta_cristobalite_192_ase
+python3 scripts/01_make_ph_precursors.py --base-atoms 1536
 ```
 
-Untuk menambahkan sedikit gangguan posisi sebelum minimisasi:
+Untuk uji cepat:
 
 ```bash
-python3 scripts/make_beta_cristobalite.py --a 7.15 --reps 2 2 2 --jitter 0.02 --out-prefix structures/beta_cristobalite_192_jitter
+python3 scripts/01_make_ph_precursors.py --base-atoms 192 --scale-box 1.20
 ```
 
-## Catatan penting tentang paper dan ReaxFF
+## 5. Menjalankan pipeline baseline
 
-Paper Niu et al. menggunakan LAMMPS + development PLUMED 2, timestep 2 fs, thermostat stochastic velocity rescaling dengan waktu relaksasi 0.1 ps, barostat Parrinello-Rahman pada 1 atm dengan waktu relaksasi 10 ps, dan WTMetaD dengan bias factor 100, Gaussian setiap 1 ps, sigma 5 unit CV, dan tinggi 40 kJ/mol.
-
-Paket ini memakai ReaxFF karena Anda mengunggah `ffield.reax.SiOH`. Karena ReaxFF reactive dan QEq biasanya lebih sensitif, timestep default diset konservatif `0.25 fs`, bukan 2 fs. Setelah energi stabil, Anda boleh uji bertahap 0.5 fs atau lebih, tetapi jangan langsung memakai 2 fs untuk ReaxFF tanpa validasi energi/temperatur.
-
-## Jalur A - satu executable LAMMPS dengan ReaxFF + PLUMED
-
-Ini jalur yang diperlukan untuk metadynamics ter-bias. Satu executable LAMMPS harus mengenali `pair_style reaxff`, `fix qeq/reaxff`, dan `fix plumed`.
-
-Cek executable:
+Uji cepat tanpa menjalankan LAMMPS:
 
 ```bash
-cd sio2_reaxff_plumed_project
-LAMMPS_BIN=/path/to/lmp ./scripts/check_lammps_features.sh
+DRYRUN=1 LMP=lmp ./scripts/03_run_all_ph.sh 192
 ```
 
-Jalankan preparasi:
+Run satu pH:
 
 ```bash
-LAMMPS_BIN=/path/to/lmp ./scripts/run_reaxff_pipeline.sh
+LMP=lmp ./scripts/02_run_one_pipeline.sh pH7p0 1536
 ```
 
-Lalu jalankan WTMetaD approximate:
+Run semua pH secara berurutan:
 
 ```bash
-LAMMPS_BIN=/path/to/lmp ./scripts/run_wtmetad.sh
+LMP=lmp ./scripts/03_run_all_ph.sh 1536
 ```
 
-Input PLUMED yang disediakan (`plumed/plumed_saxs_metad_approx.dat`) adalah pendekatan berbasis stock `SAXS` PLUMED, bukan exact paper CV. Untuk reproduksi paper-level, Anda perlu PLUMED dengan CV XRD/structure factor development atau implementasi CV sendiri, lalu ganti isi file PLUMED tersebut.
-
-## Jalur B - dua executable terpisah: ReaxFF saja + analisis CV offline
-
-Jika Anda hanya punya executable ReaxFF dan executable/instalasi PLUMED terpisah, bias metadynamics tidak dapat diterapkan balik ke dinamika ReaxFF. Jalur praktisnya:
-
-1. Jalankan ReaxFF untuk membuat trajectory.
-2. Hitung CV XRD `I(Q111)` dan `I(Q022)` dari dump trajectory memakai Python.
-
-Contoh:
+Untuk produksi ilmiah, naikkan jumlah step:
 
 ```bash
-cd sio2_reaxff_plumed_project
-LAMMPS_BIN=/path/to/lmp_reaxff ./scripts/run_reaxff_pipeline.sh
-LAMMPS_BIN=/path/to/lmp_reaxff ./scripts/run_reaxff_postprocess_workflow.sh
+LMP=lmp \
+N_EQ=200000 N_HEAT=400000 N_HOLD=800000 N_PROD=2000000 \
+./scripts/03_run_all_ph.sh 1536
 ```
 
-Atau untuk dump yang sudah ada:
+Dengan timestep 0,25 fs, 2.000.000 step = 500 ps.
 
-```bash
-./scripts/postprocess_existing_dump.sh outputs/production_no_plumed.lammpstrj outputs/xrd_cv_from_dump.dat
-```
+## 6. Urutan stage LAMMPS
 
-Format output:
+| Stage | File input | Tujuan |
+|---:|---|---|
+| 01 | `lammps/in.01_minimize_precursor` | minimisasi energi awal |
+| 02 | `lammps/in.02_equilibrate_300K` | ekuilibrasi 300 K |
+| 03 | `lammps/in.03_calcination_1173K` | analog kalsinasi 900 °C/1173 K |
+| 04 | `lammps/in.04_highT_unbiased_reaxff` | trajektori suhu tinggi tanpa bias untuk screening kristalisasi dan rentang CV |
+| 05 | `lammps/in.05_wtmetad_plumed` | WTMetaD opsional dengan PLUMED |
+
+Semua input memakai urutan ReaxFF yang sama: `read_data` → `pair_style reaxff` → `pair_coeff * * ... Si O H` → `fix qeq/reaxff` → integrator/PLUMED → `run`.
+
+## 7. PLUMED: dua opsi
+
+### Opsi A — Stock Local-Q6 fallback
+
+File tersedia di:
 
 ```text
-# step I_Q1.52207 I_Q2.48553
-0 ... ...
-1000 ... ...
+plumed/stock_localq6/plumed_localq6_pH7p0_N1536.dat
 ```
 
-## Urutan input LAMMPS
+Ini dapat dipakai untuk eksplorasi awal jika PLUMED dibangun dengan `crystallization` module. CV ini bukan CV XRD Niu, tetapi berguna untuk memantau peningkatan order pada sublattice Si.
 
-1. `lammps/in.00_minimize_reaxff`  
-   Minimisasi beta-cristobalite ideal.
+Menjalankan Stage 05:
 
-2. `lammps/in.01_melt_reaxff`  
-   Melt pada 4000 K dengan NPT. Default pendek 10 ps; produksi perlu diperpanjang.
+```bash
+LMP=lmp RUN_META=1 ./scripts/02_run_one_pipeline.sh pH7p0 1536
+```
 
-3. `lammps/in.02_equilibrate_liquid_reaxff`  
-   Equilibrate liquid silica pada 2400 K dan 1 atm.
+### Opsi B — Niu-style XRD/Debye WTMetaD
 
-4. `lammps/in.03_reaxff_plumed_wtmetad`  
-   ReaxFF + PLUMED WTMetaD. Perlu satu executable gabungan.
-
-5. `lammps/in.04_reaxff_production_no_plumed`  
-   Produksi ReaxFF tanpa PLUMED, untuk workflow dua executable dan post-processing.
-
-## Parameter Q untuk CV
-
-Dengan `a = 7.15 Å`:
+Template ada di:
 
 ```text
-Q111 = 1.52207 Å^-1
-Q022 = 2.48553 Å^-1
+plumed/custom_xrd_template/plumed_xrd_wtmetad_NEEDS_CUSTOM_DEBYE_ACTION.dat
 ```
 
-Nilai ini ada di `plumed/q_values_beta_cristobalite.txt`. Script Python `xrd_debye_cv.py` memakai nilai ini sebagai default.
+Ini memerlukan custom PLUMED action `DEBYE_STRUCTURE_FACTOR` atau action ekuivalen. Jangan menjalankan file ini sebelum custom action benar-benar terkompilasi dan keyword-nya cocok dengan versi PLUMED yang dipakai.
 
-## Cara build LAMMPS yang benar secara konsep
+## 8. Post-processing
 
-Anda butuh satu LAMMPS yang dibangun dengan paket REAXFF dan PLUMED. Contoh CMake konseptual:
+Setelah Stage 03 selesai:
 
 ```bash
-git clone https://github.com/lammps/lammps.git
-cd lammps
-mkdir build && cd build
-cmake ../cmake \
-  -D CMAKE_BUILD_TYPE=Release \
-  -D BUILD_MPI=on \
-  -D PKG_REAXFF=on \
-  -D PKG_PLUMED=on
-make -j 4
+./scripts/07_postprocess_all.sh 1536 03_calcination_1173K calcined_1173K.data
 ```
 
-Jika PLUMED terinstal non-standar, pastikan environment PLUMED (`plumed config`) bisa ditemukan oleh CMake atau patch sesuai instruksi versi PLUMED/LAMMPS Anda.
+Output utama:
 
-## Troubleshooting cepat
-
-- `ERROR: Unrecognized pair style 'reaxff'`: LAMMPS tidak punya paket REAXFF, atau binary yang dipakai salah.
-- `ERROR: Unrecognized fix style 'plumed'`: LAMMPS tidak dipatch/dibuild dengan PLUMED.
-- `Pair reaxff requires fix qeq/reaxff`: pastikan baris `fix qeq all qeq/reaxff ... reaxff` aktif.
-- Simulasi meledak pada suhu tinggi: kecilkan timestep ke 0.1 fs, mulai dari minimisasi, atau panaskan bertahap.
-- PLUMED gagal pada `ARG=xrd.q-0`: cek `logs/plumed_wtmetad.log` atau jalankan print-only untuk melihat nama komponen output `SAXS` di versi PLUMED Anda.
-
-## Validasi yang sudah dijalankan di sandbox
-
-Di sandbox ini tidak tersedia executable LAMMPS/PLUMED maupun modul ASE. Yang berhasil dijalankan:
-
-```bash
-python3 scripts/make_beta_cristobalite.py
-python3 scripts/xrd_debye_cv.py structures/beta_cristobalite_192.xyz
+```text
+outputs/03_calcination_1173K_N1536/fig_md_xrd_overlay_vs_pH.png
+outputs/03_calcination_1173K_N1536/fig_md_tetrahedral_si_fraction_vs_pH.png
+outputs/03_calcination_1173K_N1536/fig_md_oxygen_speciation_vs_pH.png
+analysis/03_calcination_1173K_N1536/metrics_all.csv
 ```
 
-Hasil awal tersimpan di `outputs/xrd_initial.dat`.
+Plot referensi skripsi sudah dibuat di:
+
+```text
+outputs/thesis_reference_plots/
+```
+
+## 9. Cara membaca hasil untuk narasi pH → kristalisasi
+
+Narasi inti yang disarankan:
+
+1. Sebelum kalsinasi, eksperimen menunjukkan prekursor tetap amorf.
+2. Setelah kalsinasi 900 °C, pH 7 menghasilkan kristalit cristobalite paling besar, FWHM terkecil, dan rasio Ik/It tertinggi.
+3. ReaxFF digunakan untuk menguji apakah pH proxy tersebut menghasilkan jaringan dengan fraksi SiO4 lebih tinggi, silanol lebih rendah, dan jembatan Si-O-Si lebih dominan.
+4. Debye-XRD simulasi digunakan untuk menghubungkan koordinat atomistik dengan puncak XRD eksperimen.
+5. Jika custom XRD-CV WTMetaD tersedia, FES dapat dipakai untuk menguji apakah pH 7 memiliki barrier kristalisasi lebih rendah atau basin kristalin yang lebih stabil.
+

@@ -1,0 +1,13 @@
+# Stock PLUMED fallback: Local-Q6 order parameter on the Si sublattice.
+# Requires PLUMED built with the crystallization module.
+# This is NOT the exact Niu et al. XRD/Debye collective variable.
+UNITS LENGTH=A TIME=fs ENERGY=kcal/mol
+
+# pH6p0: Si atoms are contiguous because data files are written Si/O/H.
+q6: Q6 SPECIES=1-64 SWITCH={RATIONAL D_0=2.7 R_0=0.6}
+lq6: LOCAL_Q6 SPECIES=q6 SWITCH={RATIONAL D_0=2.7 R_0=0.6} MEAN
+
+metad: METAD ARG=lq6.mean SIGMA=0.02 HEIGHT=0.50 PACE=2000 BIASFACTOR=50 TEMP=2300.0 FILE=runs/pH6p0_N192/05_wtmetad_plumed/HILLS_pH6p0_N192 GRID_MIN=-0.30 GRID_MAX=1.00 GRID_BIN=650 CALC_RCT
+
+PRINT ARG=lq6.mean,metad.bias,metad.rct,metad.rbias STRIDE=100 FILE=runs/pH6p0_N192/05_wtmetad_plumed/COLVAR
+FLUSH STRIDE=100
