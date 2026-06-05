@@ -11,7 +11,7 @@ fi
 
 echo "\n== PLUMED executable =="
 if command -v plumed >/dev/null 2>&1; then
-  plumed --version || true
+  plumed info --version || true
 else
   echo "plumed command not found. Needed only for Stage 05."
 fi

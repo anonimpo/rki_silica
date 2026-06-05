@@ -60,7 +60,13 @@ Uji cepat tanpa menjalankan LAMMPS:
 DRYRUN=1 LMP=lmp ./scripts/03_run_all_ph.sh 192
 ```
 
-Run satu pH:
+Run satu pH (contoh ukuran kecil untuk uji cepat):
+
+```bash
+LMP=lmp ./scripts/02_run_one_pipeline.sh pH7p0 192
+```
+
+Run satu pH dengan ukuran produksi:
 
 ```bash
 LMP=lmp ./scripts/02_run_one_pipeline.sh pH7p0 1536
@@ -71,6 +77,8 @@ Run semua pH secara berurutan:
 ```bash
 LMP=lmp ./scripts/03_run_all_ph.sh 1536
 ```
+
+Perintah ini sekarang meneruskan `phlabel` dan `baseatoms` ke input LAMMPS melalui `-var`, sehingga file `lammps/in.*` tidak lagi mendeklarasikan ulang variabel tersebut.
 
 Untuk produksi ilmiah, naikkan jumlah step:
 

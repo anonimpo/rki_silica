@@ -1,0 +1,175 @@
+
+read_data       runs/${phlabel}_N${baseatoms}/01_minimize/minimized.data
+read_data       runs/pH6p5_N${baseatoms}/01_minimize/minimized.data
+read_data       runs/pH6p5_N192/01_minimize/minimized.data
+Reading data file ...
+  orthogonal box = (0 0 0) to (17.16 17.16 17.16)
+  1 by 1 by 1 MPI processor grid
+  reading atoms ...
+  222 atoms
+  reading velocities ...
+  222 velocities
+  read_data CPU = 0.002 seconds
+
+pair_style      reaxff NULL safezone 2.0 mincap 100
+pair_coeff      * * potentials/ffield.reax.SiOH Si O H
+WARNING: Changed valency_val to valency_boc for X (src/REAXFF/reaxff_ffield.cpp:294)
+neighbor        2.0 bin
+neigh_modify    every 10 delay 0 check yes
+fix             qeq all qeq/reaxff 1 0.0 10.0 1.0e-6 reaxff maxiter 200
+
+timestep        ${dt}
+timestep        0.25
+velocity        all create 300.0 ${seed} mom yes rot yes dist gaussian
+velocity        all create 300.0 912345 mom yes rot yes dist gaussian
+fix             npt300 all npt temp 300.0 300.0 100.0 iso 1.0 1.0 1000.0
+
+thermo          500
+thermo_style    custom step time temp press pe ke etotal vol density
+thermo_modify   flush yes lost warn
+
+dump            dmp all custom 1000 ${rundir}/eq300.lammpstrj id type q x y z vx vy vz
+dump            dmp all custom 1000 runs/pH6p5_N192/02_equilibrate_300K/eq300.lammpstrj id type q x y z vx vy vz
+dump_modify     dmp sort id
+
+run             ${nsteps}
+run             20000
+
+CITE-CITE-CITE-CITE-CITE-CITE-CITE-CITE-CITE-CITE-CITE-CITE-CITE
+
+Your simulation uses code contributions which should be cited:
+
+- Type Label Framework: https://doi.org/10.1021/acs.jpcb.3c08419
+
+@Article{Gissinger24,
+ author = {Jacob R. Gissinger, Ilia Nikiforov, Yaser Afshar, Brendon Waters, Moon-ki Choi, Daniel S. Karls, Alexander Stukowski, Wonpil Im, Hendrik Heinz, Axel Kohlmeyer, and Ellad B. Tadmor},
+ title = {Type Label Framework for Bonded Force Fields in LAMMPS},
+ journal = {J. Phys. Chem. B},
+ year =    2024,
+ volume =  128,
+ number =  13,
+ pages =   {3282–-3297}
+}
+
+- pair reaxff command: doi:10.1016/j.parco.2011.08.005
+
+@Article{Aktulga12,
+ author = {H. M. Aktulga and J. C. Fogarty and S. A. Pandit and A. Y. Grama},
+ title = {Parallel Reactive Molecular Dynamics: {N}umerical Methods and Algorithmic Techniques},
+ journal = {Parallel Computing},
+ year =    2012,
+ volume =  38,
+ number =  {4--5},
+ pages =   {245--259}
+}
+
+- fix qeq/reaxff command: doi:10.1016/j.parco.2011.08.005
+
+@Article{Aktulga12,
+ author = {H. M. Aktulga and J. C. Fogarty and S. A. Pandit and A. Y. Grama},
+ title = {Parallel Reactive Molecular Dynamics: {N}umerical Methods and Algorithmic Techniques},
+ journal = {Parallel Computing},
+ year =    2012,
+ volume =  38,
+ pages =   {245--259}
+}
+
+CITE-CITE-CITE-CITE-CITE-CITE-CITE-CITE-CITE-CITE-CITE-CITE-CITE
+
+Neighbor list info ...
+  update: every = 10 steps, delay = 0 steps, check = yes
+  max neighbors/atom: 2000, page size: 100000
+  master list distance cutoff = 12
+  ghost atom cutoff = 12
+  binsize = 6, bins = 3 3 3
+  2 neighbor lists, perpetual/occasional/extra = 2 0 0
+  (1) pair reaxff, perpetual
+      attributes: half, newton off, ghost
+      pair build: half/bin/ghost/newtoff
+      stencil: full/ghost/bin/3d
+      bin: standard
+  (2) fix qeq/reaxff, perpetual, copy from (1)
+      attributes: half, newton off
+      pair build: copy
+      stencil: none
+      bin: none
+Per MPI rank memory allocation (min/avg/max) = 83.86 | 83.86 | 83.86 Mbytes
+   Step          Time           Temp          Press          PotEng         KinEng         TotEng         Volume        Density    
+         0   0              300           -193598.6      -26404.044      197.62771     -26206.417      5053.0297      1.3228858    
+       500   125            586.33831     -47678.219     -30688.935      386.25565     -30302.679      3059.9619      2.1845309    
+      1000   250            559.24565      29272.689     -31023.282      368.40811     -30654.874      2808.279       2.3803124    
+      1500   375            389.10579      16001.303     -31113.281      256.32695     -30856.954      2807.434       2.3810288    
+      2000   500            309.43462     -11044.072     -31174.611      203.84285     -30970.768      2808.2979      2.3802963    
+      2500   625            272.65313     -21288.105     -31203.995      179.61271     -31024.382      2811.9307      2.3772212    
+      3000   750            270.82216     -2785.2397     -31211.132      178.40654     -31032.725      2810.1151      2.378757     
+      3500   875            298.21957     -12581.726     -31197.347      196.45483     -31000.892      2810.1177      2.3787549    
+      4000   1000           324.22006     -1660.9138     -31189.056      213.58289     -30975.473      2810.0283      2.3788306    
+      4500   1125           338.40025     -496.86172     -31217.431      222.92422     -30994.507      2823.1632      2.3677629    
+      5000   1250           282.05763      21922.786     -31221.232      185.80801     -31035.424      2810.1996      2.3786855    
+      5500   1375           293.75863     -11965.769     -31230.671      193.51615     -31037.155      2801.1078      2.3864062    
+      6000   1500           307.45052     -3964.276      -31213.673      202.53581     -31011.137      2811.5011      2.3775844    
+      6500   1625           291.38992      1315.5518     -31184.147      191.95574     -30992.191      2807.514       2.3809609    
+      7000   1750           305.95543     -11365.636     -31204.249      201.5509      -31002.698      2810.0715      2.3787939    
+      7500   1875           297.94351     -15677.187     -31218.297      196.27297     -31022.024      2825.4139      2.3658768    
+      8000   2000           283.8078       17114.392     -31220.393      186.96095     -31033.432      2812.0211      2.3771447    
+      8500   2125           288.20951      15161.247     -31220.264      189.86062     -31030.403      2806.6606      2.3816849    
+      9000   2250           315.60254     -20195.721     -31219.177      207.90602     -31011.271      2824.8146      2.3663787    
+      9500   2375           324.12684      1388.5722     -31215.708      213.52148     -31002.186      2826.6018      2.3648825    
+     10000   2500           324.64573      11278.027     -31224.854      213.8633      -31010.991      2816.9423      2.3729919    
+     10500   2625           294.42157      9105.8259     -31219.213      193.95287     -31025.26       2813.5002      2.375895     
+     11000   2750           270.39551     -4762.3211     -31206.893      178.12548     -31028.767      2816.8553      2.3730651    
+     11500   2875           323.41351      9372.3499     -31224.373      213.05157     -31011.322      2819.8399      2.3705534    
+     12000   3000           325.23775     -12181.412     -31219.649      214.2533      -31005.396      2805.2058      2.38292      
+     12500   3125           286.77089     -14317.033     -31214.73       188.91291     -31025.818      2814.0649      2.3754182    
+     13000   3250           282.14424     -19192.638     -31229.366      185.86506     -31043.501      2830.1814      2.3618914    
+     13500   3375           309.12408      5970.691      -31239.662      203.63828     -31036.024      2812.884       2.3764155    
+     14000   3500           310.14059      18374.452     -31212.276      204.30791     -31007.968      2813.6081      2.3758039    
+     14500   3625           302.37371      17206.56      -31204.839      199.19141     -31005.647      2821.7106      2.3689819    
+     15000   3750           294.38335      3393.1569     -31227.342      193.92769     -31033.414      2818.0725      2.3720401    
+     15500   3875           275.8192       5621.5924     -31218.532      181.69838     -31036.833      2808.0475      2.3805086    
+     16000   4000           306.05143      12589.871     -31224.823      201.61414     -31023.208      2820.9577      2.3696141    
+     16500   4125           294.3279      -17257.712     -31208.945      193.89116     -31015.054      2826.2372      2.3651876    
+     17000   4250           314.39501     -18000.157     -31224.791      207.11055     -31017.68       2809.4356      2.3793324    
+     17500   4375           315.28682      13090.947     -31234.117      207.69804     -31026.419      2811.8859      2.377259     
+     18000   4500           272.68472      12115.293     -31233.251      179.63352     -31053.618      2815.0093      2.3746213    
+     18500   4625           295.1512      -8847.2413     -31237.035      194.43351     -31042.601      2814.789       2.3748071    
+     19000   4750           308.64932      33342.277     -31220.337      203.32553     -31017.012      2803.2695      2.384566     
+     19500   4875           316.75532      4623.6284     -31226.097      208.66543     -31017.432      2812.925       2.3763809    
+     20000   5000           298.92398     -6101.4674     -31222.685      196.91887     -31025.766      2807.045       2.3813588    
+Loop time of 690.155 on 1 procs for 20000 steps with 222 atoms
+
+Performance: 0.626 ns/day, 38.342 hours/ns, 28.979 timesteps/s, 6.433 katom-step/s
+100.0% CPU use with 1 MPI tasks x 1 OpenMP threads
+
+MPI task timing breakdown:
+Section |  min time  |  avg time  |  max time  |%varavg| %total
+---------------------------------------------------------------
+Pair    | 600.74     | 600.74     | 600.74     |   0.0 | 87.04
+Neigh   | 2.1559     | 2.1559     | 2.1559     |   0.0 |  0.31
+Comm    | 0.3794     | 0.3794     | 0.3794     |   0.0 |  0.05
+Output  | 0.012674   | 0.012674   | 0.012674   |   0.0 |  0.00
+Modify  | 86.792     | 86.792     | 86.792     |   0.0 | 12.58
+Other   |            | 0.07289    |            |       |  0.01
+
+Nlocal:            222 ave         222 max         222 min
+Histogram: 1 0 0 0 0 0 0 0 0 0
+Nghost:           4224 ave        4224 max        4224 min
+Histogram: 1 0 0 0 0 0 0 0 0 0
+Neighs:         105778 ave      105778 max      105778 min
+Histogram: 1 0 0 0 0 0 0 0 0 0
+
+Total # of neighbors = 105778
+Ave neighs/atom = 476.47748
+Neighbor list builds = 92
+Dangerous builds = 0
+
+write_data      ${rundir}/eq300.data
+write_data      runs/pH6p5_N192/02_equilibrate_300K/eq300.data
+System init for write_data ...
+write_restart   ${rundir}/eq300.restart
+write_restart   runs/pH6p5_N192/02_equilibrate_300K/eq300.restart
+System init for write_restart ...
+unfix           npt300
+unfix           qeq
+undump          dmp
+Total wall time: 0:11:30

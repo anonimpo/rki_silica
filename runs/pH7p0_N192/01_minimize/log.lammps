@@ -1,0 +1,144 @@
+
+read_data       structures/precursor_${phlabel}_N${baseatoms}.data
+read_data       structures/precursor_pH7p0_N${baseatoms}.data
+read_data       structures/precursor_pH7p0_N192.data
+Reading data file ...
+  orthogonal box = (0 0 0) to (17.16 17.16 17.16)
+  1 by 1 by 1 MPI processor grid
+  reading atoms ...
+  216 atoms
+  read_data CPU = 0.002 seconds
+
+# ReaxFF must be defined before pair_coeff. Atom-type mapping is:
+# type 1=Si, type 2=O, type 3=H -> ffield elements Si O H.
+pair_style      reaxff NULL safezone 2.0 mincap 100
+pair_coeff      * * potentials/ffield.reax.SiOH Si O H
+WARNING: Changed valency_val to valency_boc for X (src/REAXFF/reaxff_ffield.cpp:294)
+
+neighbor        2.0 bin
+neigh_modify    every 10 delay 0 check yes
+
+# ReaxFF electrostatics require dynamic charge equilibration unless checkqeq is disabled.
+fix             qeq all qeq/reaxff 1 0.0 10.0 1.0e-6 reaxff maxiter 200
+
+timestep        ${dt}
+timestep        0.25
+thermo          100
+thermo_style    custom step time temp press pe ke etotal vol density
+thermo_modify   flush yes lost warn
+
+dump            dmp all custom 500 ${rundir}/minimize.lammpstrj id type q x y z
+dump            dmp all custom 500 runs/pH7p0_N192/01_minimize/minimize.lammpstrj id type q x y z
+dump_modify     dmp sort id
+
+min_style       cg
+min_modify      dmax 0.05 line quadratic
+minimize        1.0e-5 1.0e-7 2000 20000
+
+CITE-CITE-CITE-CITE-CITE-CITE-CITE-CITE-CITE-CITE-CITE-CITE-CITE
+
+Your simulation uses code contributions which should be cited:
+
+- Type Label Framework: https://doi.org/10.1021/acs.jpcb.3c08419
+
+@Article{Gissinger24,
+ author = {Jacob R. Gissinger, Ilia Nikiforov, Yaser Afshar, Brendon Waters, Moon-ki Choi, Daniel S. Karls, Alexander Stukowski, Wonpil Im, Hendrik Heinz, Axel Kohlmeyer, and Ellad B. Tadmor},
+ title = {Type Label Framework for Bonded Force Fields in LAMMPS},
+ journal = {J. Phys. Chem. B},
+ year =    2024,
+ volume =  128,
+ number =  13,
+ pages =   {3282–-3297}
+}
+
+- pair reaxff command: doi:10.1016/j.parco.2011.08.005
+
+@Article{Aktulga12,
+ author = {H. M. Aktulga and J. C. Fogarty and S. A. Pandit and A. Y. Grama},
+ title = {Parallel Reactive Molecular Dynamics: {N}umerical Methods and Algorithmic Techniques},
+ journal = {Parallel Computing},
+ year =    2012,
+ volume =  38,
+ number =  {4--5},
+ pages =   {245--259}
+}
+
+- fix qeq/reaxff command: doi:10.1016/j.parco.2011.08.005
+
+@Article{Aktulga12,
+ author = {H. M. Aktulga and J. C. Fogarty and S. A. Pandit and A. Y. Grama},
+ title = {Parallel Reactive Molecular Dynamics: {N}umerical Methods and Algorithmic Techniques},
+ journal = {Parallel Computing},
+ year =    2012,
+ volume =  38,
+ pages =   {245--259}
+}
+
+CITE-CITE-CITE-CITE-CITE-CITE-CITE-CITE-CITE-CITE-CITE-CITE-CITE
+
+Switching to 'neigh_modify every 1 delay 0 check yes' setting during minimization
+Neighbor list info ...
+  update: every = 1 steps, delay = 0 steps, check = yes
+  max neighbors/atom: 2000, page size: 100000
+  master list distance cutoff = 12
+  ghost atom cutoff = 12
+  binsize = 6, bins = 3 3 3
+  2 neighbor lists, perpetual/occasional/extra = 2 0 0
+  (1) pair reaxff, perpetual
+      attributes: half, newton off, ghost
+      pair build: half/bin/ghost/newtoff
+      stencil: full/ghost/bin/3d
+      bin: standard
+  (2) fix qeq/reaxff, perpetual, copy from (1)
+      attributes: half, newton off
+      pair build: copy
+      stencil: none
+      bin: none
+Per MPI rank memory allocation (min/avg/max) = 82.89 | 82.89 | 82.89 Mbytes
+   Step          Time           Temp          Press          PotEng         KinEng         TotEng         Volume        Density    
+         0   0              0             -154671.76     -23508.322      0             -23508.322      5053.0297      1.3110452    
+        68   17             0             -203402.7      -25615.23       0             -25615.23       5053.0297      1.3110452    
+Loop time of 2.86774 on 1 procs for 68 steps with 216 atoms
+
+99.8% CPU use with 1 MPI tasks x 1 OpenMP threads
+
+Minimization stats:
+  Stopping criterion = energy tolerance
+  Energy initial, next-to-last, final = 
+      -23508.322428365  -25615.1458726711  -25615.2302208784
+  Force two-norm initial, final = 8093.8278 100.86645
+  Force max component initial, final = 4831.5632 46.70305
+  Final line search alpha, max atom move = 0.00095173685 0.044449013
+  Iterations, force evaluations = 68 148
+
+MPI task timing breakdown:
+Section |  min time  |  avg time  |  max time  |%varavg| %total
+---------------------------------------------------------------
+Pair    | 2.2688     | 2.2688     | 2.2688     |   0.0 | 79.12
+Neigh   | 0.012567   | 0.012567   | 0.012567   |   0.0 |  0.44
+Comm    | 0.0030347  | 0.0030347  | 0.0030347  |   0.0 |  0.11
+Output  | 0          | 0          | 0          |   0.0 |  0.00
+Modify  | 0.58055    | 0.58055    | 0.58055    |   0.0 | 20.24
+Other   |            | 0.002747   |            |       |  0.10
+
+Nlocal:            216 ave         216 max         216 min
+Histogram: 1 0 0 0 0 0 0 0 0 0
+Nghost:           2940 ave        2940 max        2940 min
+Histogram: 1 0 0 0 0 0 0 0 0 0
+Neighs:          52729 ave       52729 max       52729 min
+Histogram: 1 0 0 0 0 0 0 0 0 0
+
+Total # of neighbors = 52729
+Ave neighs/atom = 244.11574
+Neighbor list builds = 1
+Dangerous builds = 0
+
+write_data      ${rundir}/minimized.data
+write_data      runs/pH7p0_N192/01_minimize/minimized.data
+System init for write_data ...
+write_restart   ${rundir}/minimized.restart
+write_restart   runs/pH7p0_N192/01_minimize/minimized.restart
+System init for write_restart ...
+unfix           qeq
+undump          dmp
+Total wall time: 0:00:02

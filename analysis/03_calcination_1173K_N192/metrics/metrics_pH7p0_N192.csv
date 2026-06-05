@@ -1,0 +1,2 @@
+ph_label,source,n_si,n_o,n_h,si_o_coord_mean,si_o_coord_std,frac_si_coord4,frac_si_undercoord,frac_si_overcoord,frac_o_bridging_2si_0h,frac_o_nonbridging_1si,frac_o_silanol_proxy_1si_ge1h,frac_o_water_proxy_0si_ge2h,siloxane_bridge_count,silanol_proxy_count,water_proxy_count
+pH7p0,runs/pH7p0_N192/03_calcination_1173K/calcined_1173K.data,64,136,16,3.984375,0.12401959270615269,0.984375,0.015625,0.0,0.9338235294117647,0.007352941176470588,0.0,0.058823529411764705,127,0,8

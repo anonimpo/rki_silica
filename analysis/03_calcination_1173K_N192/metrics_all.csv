@@ -1,0 +1,4 @@
+ph_label,source,n_si,n_o,n_h,si_o_coord_mean,si_o_coord_std,frac_si_coord4,frac_si_undercoord,frac_si_overcoord,frac_o_bridging_2si_0h,frac_o_nonbridging_1si,frac_o_silanol_proxy_1si_ge1h,frac_o_water_proxy_0si_ge2h,siloxane_bridge_count,silanol_proxy_count,water_proxy_count,pH
+pH6p0,runs/pH6p0_N192/03_calcination_1173K/calcined_1173K.data,64,140,24,3.984375,0.1240195927061526,0.984375,0.015625,0.0,0.9,0.0214285714285714,0.0142857142857142,0.0785714285714285,126,2,11,6.0
+pH6p5,runs/pH6p5_N192/03_calcination_1173K/calcined_1173K.data,64,138,20,3.984375,0.1240195927061526,0.984375,0.015625,0.0,0.9057971014492754,0.036231884057971,0.0289855072463768,0.0579710144927536,125,4,8,6.5
+pH7p0,runs/pH7p0_N192/03_calcination_1173K/calcined_1173K.data,64,136,16,3.984375,0.1240195927061526,0.984375,0.015625,0.0,0.9338235294117648,0.0073529411764705,0.0,0.0588235294117647,127,0,8,7.0

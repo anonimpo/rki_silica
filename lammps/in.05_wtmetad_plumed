@@ -8,13 +8,7 @@ atom_style      charge
 boundary        p p p
 newton          on
 
-variable        phlabel    string pH7p0
-variable        baseatoms  string 1536
-variable        Tprod      equal 2300.0
 variable        dt         equal 0.25
-variable        nheat      equal 80000      # 20 ps default
-variable        nmeta      equal 400000     # 100 ps default; increase to >= 2 ns for meaningful FES
-variable        plumedfile string plumed/stock_localq6/plumed_localq6_${phlabel}_N${baseatoms}.dat
 variable        rundir     string runs/${phlabel}_N${baseatoms}/05_wtmetad_plumed
 shell           mkdir -p ${rundir}
 log             ${rundir}/log.lammps

@@ -8,8 +8,6 @@ atom_style      charge
 boundary        p p p
 newton          on
 
-variable        phlabel   string pH7p0
-variable        baseatoms string 1536
 variable        dt        equal 0.25
 variable        rundir    string runs/${phlabel}_N${baseatoms}/01_minimize
 shell           mkdir -p ${rundir}
