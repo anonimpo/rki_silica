@@ -1,10 +1,12 @@
-LAMMPS (29 Aug 2024 - Update 1)
+LAMMPS (29 Aug 2024)
+OMP_NUM_THREADS environment is not set. Defaulting to 1 thread. (src/comm.cpp:98)
   using 1 OpenMP thread(s) per MPI task
 # Stage 04: high-temperature unbiased ReaxFF trajectory for accelerated crystallization screening.
 # Use for structural comparison and to obtain pre-MetaD CV ranges.
 #   lmp -var phlabel pH7p0 -var baseatoms 1536 -var Tprod 2300 -in lammps/in.04_highT_unbiased_reaxff
 
 clear
+OMP_NUM_THREADS environment is not set. Defaulting to 1 thread. (src/comm.cpp:98)
   using 1 OpenMP thread(s) per MPI task
 units           real
 atom_style      charge
@@ -13,10 +15,10 @@ newton          on
 
 variable        dt        equal 0.25
 variable        rundir    string runs/${phlabel}_N${baseatoms}/04_highT_unbiased_${Tprod}K
-variable        rundir    string runs/pH7p0_N${baseatoms}/04_highT_unbiased_${Tprod}K
-variable        rundir    string runs/pH7p0_N192/04_highT_unbiased_${Tprod}K
-variable        rundir    string runs/pH7p0_N192/04_highT_unbiased_2300K
+variable        rundir    string runs/pH6p0_N${baseatoms}/04_highT_unbiased_${Tprod}K
+variable        rundir    string runs/pH6p0_N1536/04_highT_unbiased_${Tprod}K
+variable        rundir    string runs/pH6p0_N1536/04_highT_unbiased_2300K
 shell           mkdir -p ${rundir}
-shell           mkdir -p runs/pH7p0_N192/04_highT_unbiased_2300K
+shell           mkdir -p runs/pH6p0_N1536/04_highT_unbiased_2300K
 log             ${rundir}/log.lammps
-log             runs/pH7p0_N192/04_highT_unbiased_2300K/log.lammps
+log             runs/pH6p0_N1536/04_highT_unbiased_2300K/log.lammps

@@ -1,0 +1,104 @@
+
+read_data       runs/${phlabel}_N${baseatoms}/03_calcination_1173K/calcined_1173K.data
+read_data       runs/pH6p0_N${baseatoms}/03_calcination_1173K/calcined_1173K.data
+read_data       runs/pH6p0_N1536/03_calcination_1173K/calcined_1173K.data
+Reading data file ...
+  orthogonal box = (2.6649686 2.6649686 2.6649686) to (31.083031 31.083031 31.083031)
+  2 by 2 by 4 MPI processor grid
+  reading atoms ...
+  1824 atoms
+  reading velocities ...
+  1824 velocities
+  read_data CPU = 0.024 seconds
+
+pair_style      reaxff NULL safezone 2.0 mincap 100
+pair_coeff      * * potentials/ffield.reax.SiOH Si O H
+WARNING: Changed valency_val to valency_boc for X (src/REAXFF/reaxff_ffield.cpp:294)
+neighbor        2.0 bin
+neigh_modify    every 10 delay 0 check yes
+fix             qeq all qeq/reaxff 1 0.0 10.0 1.0e-6 reaxff maxiter 200
+
+timestep        ${dt}
+timestep        0.25
+thermo          1000
+thermo_style    custom step time temp press pe ke etotal vol density
+thermo_modify   flush yes lost warn
+
+dump            dmp all custom 2000 ${rundir}/traj_highT_unbiased.lammpstrj id type q x y z vx vy vz
+dump            dmp all custom 2000 runs/pH6p0_N1536/04_highT_unbiased_2300K/traj_highT_unbiased.lammpstrj id type q x y z vx vy vz
+dump_modify     dmp sort id
+fix             rb all reaxff/bonds 2000 ${rundir}/bonds.reaxff
+fix             rb all reaxff/bonds 2000 runs/pH6p0_N1536/04_highT_unbiased_2300K/bonds.reaxff
+
+fix             heat all npt temp 1173.0 ${Tprod} 100.0 iso 1.0 1.0 1000.0
+fix             heat all npt temp 1173.0 2300 100.0 iso 1.0 1.0 1000.0
+run             ${nheat}
+run             80000
+
+CITE-CITE-CITE-CITE-CITE-CITE-CITE-CITE-CITE-CITE-CITE-CITE-CITE
+
+Your simulation uses code contributions which should be cited:
+
+- Type Label Framework: https://doi.org/10.1021/acs.jpcb.3c08419
+
+@Article{Gissinger24,
+ author = {Jacob R. Gissinger, Ilia Nikiforov, Yaser Afshar, Brendon Waters, Moon-ki Choi, Daniel S. Karls, Alexander Stukowski, Wonpil Im, Hendrik Heinz, Axel Kohlmeyer, and Ellad B. Tadmor},
+ title = {Type Label Framework for Bonded Force Fields in LAMMPS},
+ journal = {J. Phys. Chem. B},
+ year =    2024,
+ volume =  128,
+ number =  13,
+ pages =   {3282–-3297}
+}
+
+- pair reaxff command: doi:10.1016/j.parco.2011.08.005
+
+@Article{Aktulga12,
+ author = {H. M. Aktulga and J. C. Fogarty and S. A. Pandit and A. Y. Grama},
+ title = {Parallel Reactive Molecular Dynamics: {N}umerical Methods and Algorithmic Techniques},
+ journal = {Parallel Computing},
+ year =    2012,
+ volume =  38,
+ number =  {4--5},
+ pages =   {245--259}
+}
+
+- fix qeq/reaxff command: doi:10.1016/j.parco.2011.08.005
+
+@Article{Aktulga12,
+ author = {H. M. Aktulga and J. C. Fogarty and S. A. Pandit and A. Y. Grama},
+ title = {Parallel Reactive Molecular Dynamics: {N}umerical Methods and Algorithmic Techniques},
+ journal = {Parallel Computing},
+ year =    2012,
+ volume =  38,
+ pages =   {245--259}
+}
+
+CITE-CITE-CITE-CITE-CITE-CITE-CITE-CITE-CITE-CITE-CITE-CITE-CITE
+
+Neighbor list info ...
+  update: every = 10 steps, delay = 0 steps, check = yes
+  max neighbors/atom: 2000, page size: 100000
+  master list distance cutoff = 12
+  ghost atom cutoff = 12
+  binsize = 6, bins = 5 5 5
+  2 neighbor lists, perpetual/occasional/extra = 2 0 0
+  (1) pair reaxff, perpetual
+      attributes: half, newton off, ghost
+      pair build: half/bin/ghost/newtoff
+      stencil: full/ghost/bin/3d
+      bin: standard
+  (2) fix qeq/reaxff, perpetual, copy from (1)
+      attributes: half, newton off
+      pair build: copy
+      stencil: none
+      bin: none
+Per MPI rank memory allocation (min/avg/max) = 99.21 | 101.1 | 102.9 Mbytes
+   Step          Time           Temp          Press          PotEng         KinEng         TotEng         Volume        Density    
+         0   0              1164.459      -5046.4929     -248542.77      6327.6897     -242215.08      22950.038      2.3509893    
+      1000   250            1185.3398     -9862.6874     -248971.26      6441.1563     -242530.1       22878.761      2.3583136    
+      2000   500            1197.1816     -3702.6753     -248509.52      6505.5049     -242004.01      23016.559      2.3441946    
+      3000   750            1189.4848     -6898.3979     -248406.81      6463.6804     -241943.13      23111.66       2.3345486    
+      4000   1000           1250.6141      4969.0386     -248281.91      6795.858      -241486.06      23093.816      2.3363525    
+      5000   1250           1214.3658      6766.3031     -248494.21      6598.884      -241895.32      22914.429      2.3546427    
+      6000   1500           1226.2146      9315.3028     -248207.36      6663.2704     -241544.09      23005.855      2.3452853    
