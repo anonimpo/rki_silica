@@ -14,3 +14,23 @@ All notable changes to this project are documented below.
 
 ### Ongoing Work
 - **$N=1536$ Production Run**: Successfully completed Stage 03 calcination for `pH6p0` on 16 cores. Resumed Stage 04 high-temperature production manually. The run is configured to pause after `pH6p0` is fully finished.
+
+### How to Resume/Continue Calculations
+
+1. **Resume Stage 04 for `pH6p0`**:
+   If Stage 04 was paused/cancelled, resume it using:
+   ```bash
+   mpirun -np 16 lmp -var phlabel pH6p0 -var baseatoms 1536 -var Tprod 2300 -var nheat 80000 -var nprod 400000 -in lammps/in.04_highT_unbiased_reaxff
+   ```
+
+2. **Continue Remaining Cases (`pH6p5`, `pH7p0`, `pH7p5`, `pH8p0`)**:
+   Once `pH6p0` is fully complete, delete the `pause_flag` file and run the remaining cases in the queue:
+   ```bash
+   # Remove the pause flag
+   rm pause_flag
+
+   # Run remaining cases sequentially
+   for PH in pH6p5 pH7p0 pH7p5 pH8p0; do
+     LMP="mpirun -np 16 lmp" ./scripts/02_run_one_pipeline.sh "$PH" 1536
+   done
+   ```
