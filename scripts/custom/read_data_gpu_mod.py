@@ -1,7 +1,7 @@
 import torch
 import ase.io
 from chgnet.model.model import CHGNet
-from chgnet.model.dynamics import MolecularDynamics
+from chgnet.model.dynamics import MolecularDynamics, CHGNetCalculator  # <--- Tambahkan CHGNetCalculator
 import os
 
 print("1. Membaca file struktur data...")
@@ -21,23 +21,29 @@ print(f"-> Membaca dari: {data_file}")
 atoms = ase.io.read(data_file, format="lammps-data")
 
 # --- MODIFIKASI DISINI UNTUK GPU ---
-# Mengecek apakah GPU NVIDIA (CUDA) tersedia di komputer Anda
 if torch.cuda.is_available():
     device = "cuda"
     print("-> GPU terdeteksi! Simulasi akan berjalan di GPU.")
+    # Mengurangi fragmentasi memori CUDA
+    import os
+    os.environ["PYTORCH_CUDA_ALLOC_CONF"] = "expandable_segments:True"
 else:
     device = "cpu"
     print("-> GPU tidak terdeteksi. Simulasi berjalan di CPU (lambat).")
 
 print("2. Memuat model pretrained CHGNet ke " + device)
-# Memuat model langsung ke perangkat (GPU/CPU) yang dipilih
 chgnet = CHGNet.load(use_device=device)
-# -----------------------------------
+
+# --- SOLUSI UTAMA: Membuat kalkulator manual dengan stress=False ---
+# Ini mencegah PyTorch melakukan autograd berat pada strain graph
+calc = CHGNetCalculator(model=chgnet, stress=False)
+atoms.set_calculator(calc)
+# ------------------------------------------------------------------
 
 print("3. Mengonfigurasi simulasi Molecular Dynamics (NVT @ 300K)...")
 md = MolecularDynamics(
     atoms=atoms,
-    model=chgnet,
+    model=chgnet,       
     ensemble="nvt",
     temperature=300,       
     timestep=0.25,         
@@ -53,3 +59,4 @@ print("   Simulasi MD Berhasil!")
 print("5. Mengonversi hasil simulasi ke format XYZ...")
 traj_configs = ase.io.read("md_out.traj", index=":")
 ase.io.write("trajectory_ftir.xyz", traj_configs, format="extxyz")
+print("   Konversi Berhasil!")
