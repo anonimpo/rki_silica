@@ -1,0 +1,29 @@
+# Fallback WTMETAD if the matrix-based XRD CV fails in your PLUMED build.
+# This is NOT the exact Niu CV. It biases similarity of Si environments to a diamond-like Si framework.
+# It uses documented PLUMED 2.10 ENVIRONMENTSIMILARITY from the envsim module.
+UNITS LENGTH=A ENERGY=kcal/mol TIME=fs
+
+si: GROUP ATOMS=1-512
+es: ENVIRONMENTSIMILARITY ...
+  SPECIES=si
+  SIGMA=0.20
+  LATTICE_CONSTANTS=7.15
+  CRYSTAL_STRUCTURE=DIAMOND
+  MEAN
+  MORE_THAN={RATIONAL R_0=0.50 NN=12 MM=24}
+... ENVIRONMENTSIMILARITY
+
+mtd: METAD ...
+  ARG=es.mean
+  SIGMA=0.02
+  HEIGHT=9.560
+  PACE=4000
+  BIASFACTOR=100
+  TEMP=2300
+  FILE=../outputs/HILLS_ENVSIM
+  GRID_MIN=0.0
+  GRID_MAX=1.0
+  GRID_BIN=500
+... METAD
+
+PRINT STRIDE=400 ARG=es.mean,es.morethan,mtd.bias FILE=../outputs/COLVAR_ENVSIM_WTMETAD

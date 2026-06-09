@@ -1,0 +1,23 @@
+# PLUMED 2.10-adapted local entropy analysis for Niu Fig. 7-like visualization.
+# Niu SI parameters: rm=0.75 nm, ra=0.45 nm, sigma=0.05 nm.
+# Converted to Angstrom: MAXR=7.5, R_0~4.25, D_MAX=4.5, BANDWIDTH=0.5.
+# This file is for analysis/rerun, not for the WTMETAD bias.
+UNITS LENGTH=A ENERGY=kcal/mol TIME=fs
+
+si: GROUP ATOMS=1-512
+sraw: PAIRENTROPIES ...
+  ATOMS=si
+  MAXR=7.5
+  BANDWIDTH=0.5
+  GRID_BIN=201
+  KERNEL=GAUSSIAN
+... PAIRENTROPIES
+
+sa: LOCAL_AVERAGE SPECIES=sraw SWITCH={RATIONAL R_0=4.25 D_MAX=4.5 NN=50 MM=100}
+
+hh1: HISTOGRAM DATA=sraw GRID_MIN=-10.0 GRID_MAX=0.0 GRID_BIN=1000 BANDWIDTH=0.05 STRIDE=1000
+DUMPGRID GRID=hh1 FILE=../outputs/histo_local_entropy_raw STRIDE=1000
+hh2: HISTOGRAM DATA=sa GRID_MIN=-10.0 GRID_MAX=0.0 GRID_BIN=1000 BANDWIDTH=0.05 STRIDE=1000
+DUMPGRID GRID=hh2 FILE=../outputs/histo_local_entropy_avg STRIDE=1000
+DUMPMULTICOLVAR FILE=../outputs/MULTICOLVAR-AVG.xyz STRIDE=1000 DATA=sa
+PRINT STRIDE=1000 ARG=* FILE=../outputs/COLVAR_LOCAL_ENTROPY

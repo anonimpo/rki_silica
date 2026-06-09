@@ -13,10 +13,10 @@ newton          on
 
 variable        dt        equal 0.25
 variable        rundir    string runs/${phlabel}_N${baseatoms}/04_highT_unbiased_${Tprod}K
-variable        rundir    string runs/pH7p0_N${baseatoms}/04_highT_unbiased_${Tprod}K
-variable        rundir    string runs/pH7p0_N192/04_highT_unbiased_${Tprod}K
-variable        rundir    string runs/pH7p0_N192/04_highT_unbiased_2300K
+variable        rundir    string runs/pH8p0_N${baseatoms}/04_highT_unbiased_${Tprod}K
+variable        rundir    string runs/pH8p0_N192/04_highT_unbiased_${Tprod}K
+variable        rundir    string runs/pH8p0_N192/04_highT_unbiased_2300K
 shell           mkdir -p ${rundir}
-shell           mkdir -p runs/pH7p0_N192/04_highT_unbiased_2300K
+shell           mkdir -p runs/pH8p0_N192/04_highT_unbiased_2300K
 log             ${rundir}/log.lammps
-log             runs/pH7p0_N192/04_highT_unbiased_2300K/log.lammps
+log             runs/pH8p0_N192/04_highT_unbiased_2300K/log.lammps

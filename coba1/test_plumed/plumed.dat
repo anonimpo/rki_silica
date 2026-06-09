@@ -1,0 +1,19 @@
+# JANGAN masukkan perintah UNITS di sini, LAMMPS akan mengaturnya otomatis!
+
+# 1. Menguji DISTANCE_MATRIX 
+mat: DISTANCE_MATRIX GROUP=1-10
+
+# 2. Menguji SUM_MATRIX 
+sm: SUM_MATRIX ARG=mat PERIODIC=NO
+
+# 3. Menguji CUSTOM 
+cust: CUSTOM ARG=sm FUNC=x*2 PERIODIC=NO
+
+# 4. Menguji Q6 (Steinhardt parameter)
+q6: Q6 SPECIES=1-10 SWITCH={RATIONAL R_0=0.3} MEAN
+
+# 5. Menguji METAD
+metad: METAD ARG=cust PACE=500 HEIGHT=1.2 SIGMA=0.2 FILE=HILLS
+
+# Output standar untuk melihat hasilnya
+PRINT ARG=sm,cust,q6.mean STRIDE=10 FILE=colvar.dat

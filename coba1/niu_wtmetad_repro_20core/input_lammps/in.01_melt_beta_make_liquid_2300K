@@ -1,0 +1,38 @@
+# Make liquid/amorphous-like silica from ideal beta-cristobalite.
+# This gives the unbiased 'before' structure for WTMETAD check.
+units           real
+atom_style      charge
+boundary        p p p
+read_data       ${DATA}
+include         input_lammps/include_reaxff_pure_sio2.inc
+
+neighbor        2.0 bin
+neigh_modify    every 1 delay 0 check yes
+
+timestep        ${DT}
+thermo          1000
+thermo_style    custom step temp pe etotal press vol density
+
+dump            dmelt all custom ${DUMP_STRIDE} outputs/dump_01_melt_make_liquid.lammpstrj id type q x y z
+
+min_style       cg
+minimize        1.0e-5 1.0e-7 2000 20000
+undump          dmelt
+reset_timestep  0
+velocity        all create 2300.0 12345 mom yes rot yes dist gaussian
+
+# High-temperature melt, then cool/equilibrate at 2300 K. Use NVT for robustness.
+fix             nvt1 all nvt temp 4200.0 4200.0 100.0
+run             ${MELT_STEPS}
+unfix           nvt1
+
+fix             nvt2 all nvt temp 4200.0 2300.0 100.0
+run             ${COOL_STEPS}
+unfix           nvt2
+
+fix             nvt3 all nvt temp 2300.0 2300.0 100.0
+run             ${EQ_STEPS}
+unfix           nvt3
+
+write_data      structures/liquid_from_beta_2300K_N1536.data
+write_restart   structures/liquid_from_beta_2300K_N1536.restart

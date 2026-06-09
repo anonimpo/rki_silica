@@ -1,0 +1,41 @@
+# Stage 03: calcination analogue, 300 K -> 1173 K and hold at 1173 K (900 degC).
+
+clear
+units           real
+atom_style      charge
+boundary        p p p
+newton          on
+
+variable        dt            equal 0.25
+variable        rundir        string runs/${phlabel}_N${baseatoms}/03_calcination_1173K
+shell           mkdir -p ${rundir}
+log             ${rundir}/log.lammps
+
+read_data       runs/${phlabel}_N${baseatoms}/02_equilibrate_300K/eq300.data
+
+pair_style      reaxff NULL safezone 2.0 mincap 100
+pair_coeff      * * kode_lammps/potentials/ffield.reax.SiOH Si O H
+neighbor        2.0 bin
+neigh_modify    every 10 delay 0 check yes
+fix             qeq all qeq/reaxff 1 0.0 10.0 1.0e-6 reaxff maxiter 200
+
+timestep        ${dt}
+thermo          1000
+thermo_style    custom step time temp press pe ke etotal vol density
+thermo_modify   flush yes lost warn
+
+dump            dmp all custom 2000 ${rundir}/calcination_1173K.lammpstrj id type q x y z vx vy vz
+dump_modify     dmp sort id
+
+fix             heat all npt temp 300.0 1173.0 100.0 iso 1.0 1.0 1000.0
+run             ${nheat}
+unfix           heat
+
+fix             hold all npt temp 1173.0 1173.0 100.0 iso 1.0 1.0 1000.0
+run             ${nhold}
+unfix           hold
+
+write_data      ${rundir}/calcined_1173K.data
+write_restart   ${rundir}/calcined_1173K.restart
+unfix           qeq
+undump          dmp

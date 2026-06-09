@@ -1,0 +1,21 @@
+# Smoke test: verify LAMMPS + ReaxFF + PLUMED + XRD-like matrix CV can parse and run.
+units           real
+atom_style      charge
+boundary        p p p
+read_data       ${DATA}
+include         input_lammps/include_reaxff_pure_sio2.inc
+
+neighbor        2.0 bin
+neigh_modify    every 1 delay 0 check yes
+
+timestep        ${DT}
+velocity        all create 300.0 12345 mom yes rot yes dist gaussian
+fix             nvt all nvt temp 300.0 300.0 100.0
+
+fix             fplumed all plumed plumedfile custom_cv/plumed_xrd111_si_matrix_CHECK_v210.dat outfile logs/plumed_smoke_xrd.log
+
+thermo          10
+thermo_style    custom step temp pe etotal press
+run             20
+
+write_data      structures/smoke_after_20steps.data

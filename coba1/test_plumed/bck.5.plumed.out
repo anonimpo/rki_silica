@@ -1,0 +1,30 @@
+PLUMED: PLUMED is starting
+PLUMED: Version: 2.10.0 (git: Unknown) compiled on Jun  2 2026 at 14:59:43
+PLUMED: Please cite these papers when using PLUMED [1][2]
+PLUMED: For further information see the PLUMED web page at http://www.plumed.org
+PLUMED: Root: /opt/plumed/lib/plumed
+PLUMED: LibraryPath: /opt/plumed/lib/libplumedKernel.so
+PLUMED: For installed feature, see /opt/plumed/lib/plumed/src/config/config.txt
+PLUMED: Molecular dynamics engine: LAMMPS
+PLUMED: Precision of reals: 8
+PLUMED: Running over 1 node
+PLUMED: Number of threads: 1
+PLUMED: Cache line size: 512
+PLUMED: Number of atoms: 108
+PLUMED: File suffix: 
+PLUMED: FILE: plumed.dat
+PLUMED: Action UNITS
+PLUMED:   with label @0
+PLUMED:   length: nm
+PLUMED:   energy: kj/mol
+PLUMED:   time: ps
+PLUMED:   charge: e
+PLUMED:   mass: amu
+PLUMED: ERROR in input to action UNITS with label @0 : cannot understand the following words from the input line : metal 
+PLUMED:  
+PLUMED: 
+PLUMED: ################################################################################
+PLUMED: 
+PLUMED: (core/Action.cpp:375) void PLMD::Action::error(const std::string&) const
+PLUMED: ERROR in input to action UNITS with label @0 : cannot understand the following words from the input line : metal
+PLUMED: ################################################################################

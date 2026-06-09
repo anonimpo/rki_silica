@@ -1,0 +1,115 @@
+LAMMPS (29 Aug 2024 - Update 1)
+  using 1 OpenMP thread(s) per MPI task
+# SKRIP LAMMPS: FINGERPRINT UNTUK FASE LIQUID / AMORF
+units           real
+atom_style      charge
+boundary        p p p
+
+# MEMBACA FILE HASIL TAHAP 1
+read_data       ../membuat_amorf/amorphous_silica_300K.data
+Reading data file ...
+  orthogonal box = (-154.10539 -154.10539 -154.10539) to (182.74539 182.74539 182.74539)
+  2 by 2 by 3 MPI processor grid
+  reading atoms ...
+  1536 atoms
+  reading velocities ...
+  1536 velocities
+  read_data CPU = 0.416 seconds
+
+pair_style      reaxff NULL checkqeq yes
+pair_coeff      * * ../potensial/ffield.reax.SiOH Si O
+WARNING: Changed valency_val to valency_boc for X (src/REAXFF/reaxff_ffield.cpp:294)
+
+neighbor        2.5 bin
+neigh_modify    delay 0 every 1 check yes
+timestep        0.5
+
+thermo          1000
+thermo_style    custom step temp pe ke press
+
+fix             f_qeq all qeq/reaxff 1 0.0 10.0 1.0e-6 reaxff
+
+# Jalankan NVT singkat pada suhu yang sama (2400 K)
+fix             f_nvt all nvt temp 2400.0 2400.0 50.0
+
+# Panggil PLUMED untuk menghitung distribusi
+fix             f_plumed all plumed plumedfile plumed.dat
+
+# ==========================================================
+# MENGHITUNG SPEKTRUM XRD
+# ==========================================================
+# 1.541838 adalah panjang gelombang sinar-X (Target Cu K-alpha)
+# 1 2 adalah tipe atom (1 untuk Si, 2 untuk O)
+# 2Theta 10 90 adalah rentang sudut (dari 10 hingga 90 derajat)
+# c 1 1 1 adalah kerapatan grid reciprocal space (bisa dinaikkan jika kurang presisi, misal c 2 2 2)
+# LP 1 berarti menyalakan faktor koreksi Lorentz-Polarization (seperti XRD asli)
+
+#compute         myXRD all xrd 1.541838 1 2 2Theta 10 90 c 1 1 1 LP 1
+compute         myXRD all xrd 1.541838 Si O 2Theta 10 90 c 1 1 1 LP 1
+# Menyimpan hasil XRD ke dalam file teks (spektrum_xrd.txt)
+# Data akan dirata-rata selama 50000 step
+fix             outXRD all ave/time 100 500 50000 c_myXRD[1] c_myXRD[2] file spektrum_liquid_xrd.txt mode vector
+# Jalankan selama 50.000 step untuk mengumpulkan statistik histogram
+run             50000
+
+CITE-CITE-CITE-CITE-CITE-CITE-CITE-CITE-CITE-CITE-CITE-CITE-CITE
+
+Your simulation uses code contributions which should be cited:
+
+- Type Label Framework: https://doi.org/10.1021/acs.jpcb.3c08419
+
+@Article{Gissinger24,
+ author = {Jacob R. Gissinger, Ilia Nikiforov, Yaser Afshar, Brendon Waters, Moon-ki Choi, Daniel S. Karls, Alexander Stukowski, Wonpil Im, Hendrik Heinz, Axel Kohlmeyer, and Ellad B. Tadmor},
+ title = {Type Label Framework for Bonded Force Fields in LAMMPS},
+ journal = {J. Phys. Chem. B},
+ year =    2024,
+ volume =  128,
+ number =  13,
+ pages =   {3282–-3297}
+}
+
+- pair reaxff command: doi:10.1016/j.parco.2011.08.005
+
+@Article{Aktulga12,
+ author = {H. M. Aktulga and J. C. Fogarty and S. A. Pandit and A. Y. Grama},
+ title = {Parallel Reactive Molecular Dynamics: {N}umerical Methods and Algorithmic Techniques},
+ journal = {Parallel Computing},
+ year =    2012,
+ volume =  38,
+ number =  {4--5},
+ pages =   {245--259}
+}
+
+- fix qeq/reaxff command: doi:10.1016/j.parco.2011.08.005
+
+@Article{Aktulga12,
+ author = {H. M. Aktulga and J. C. Fogarty and S. A. Pandit and A. Y. Grama},
+ title = {Parallel Reactive Molecular Dynamics: {N}umerical Methods and Algorithmic Techniques},
+ journal = {Parallel Computing},
+ year =    2012,
+ volume =  38,
+ pages =   {245--259}
+}
+
+- compute xrd command: doi:10.1088/0965-0393/21/5/055020
+
+@Article{Coleman13,
+ author = {S. P. Coleman and D. E. Spearot and L. Capolungo},
+ title = {Virtual Diffraction Analysis of {Ni} [010] Symmetric Tilt Grain Boundaries},
+ journal = {Modelling and Simulation in Materials Science and Engineering},
+ year =    2013,
+ volume =  21,
+ pages =   {055020}
+}
+
+CITE-CITE-CITE-CITE-CITE-CITE-CITE-CITE-CITE-CITE-CITE-CITE-CITE
+
+Neighbor list info ...
+  update: every = 1 steps, delay = 0 steps, check = yes
+  max neighbors/atom: 2000, page size: 100000
+  master list distance cutoff = 12.5
+  ghost atom cutoff = 12.5
+  binsize = 6.25, bins = 54 54 54
+  2 neighbor lists, perpetual/occasional/extra = 2 0 0
+  (1) pair reaxff, perpetual
+      att

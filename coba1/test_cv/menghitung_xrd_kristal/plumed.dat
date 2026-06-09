@@ -1,0 +1,26 @@
+# ==========================================================
+# PLUMED INPUT: Q6 + LOCAL_AVERAGE
+# ==========================================================
+
+# 1. Definisi grup atom Si
+si_atoms: GROUP ATOMS=1-1536:24,2-1536:24,3-1536:24,4-1536:24,5-1536:24,6-1536:24,7-1536:24,8-1536:24
+
+# 2. Hitung parameter Steinhardt Q6 per atom Si
+# Tambahkan keyword MEAN agar q6.mean bisa di-print di COLVAR
+q6: Q6 SPECIES=si_atoms SWITCH={RATIONAL R_0=0.425 D_MAX=0.45} MEAN
+
+# 3. Local average dari Q6
+# Gunakan SPECIES=q6, hapus ARG. Ia otomatis mengenali grup atomnya.
+q6_avg: LOCAL_AVERAGE SPECIES=q6 SWITCH={RATIONAL R_0=0.425 D_MAX=0.45} MEAN
+
+# 4. Histogram distribusi Q6
+# Gunakan keyword DATA untuk memproses nilai array/MultiColvar
+hh1: HISTOGRAM DATA=q6 GRID_MIN=0.0 GRID_MAX=1.0 GRID_BIN=200 BANDWIDTH=0.01 STRIDE=1
+hh2: HISTOGRAM DATA=q6_avg GRID_MIN=0.0 GRID_MAX=1.0 GRID_BIN=200 BANDWIDTH=0.01 STRIDE=1
+
+# 5. Dump histogram
+DUMPGRID GRID=hh1 FILE=histo1_q6 STRIDE=50000
+DUMPGRID GRID=hh2 FILE=histo2_q6avg STRIDE=50000
+
+# 6. Output monitoring
+PRINT STRIDE=100 ARG=q6.mean,q6_avg.mean FILE=COLVAR

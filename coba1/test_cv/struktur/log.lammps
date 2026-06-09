@@ -1,0 +1,75 @@
+LAMMPS (29 Aug 2024 - Update 1)
+  using 1 OpenMP thread(s) per MPI task
+# ====================================================================
+# SKRIP LAMMPS: MEMBUAT STRUKTUR AWAL KRISTAL BETA-CRISTOBALITE (PERBAIKAN TOTAL)
+# ====================================================================
+units           real
+atom_style      charge
+boundary        p p p
+
+# --------------------------------------------------------------------
+# DEFINISI LATICE BETA-CRISTOBALITE (24 Basis)
+# --------------------------------------------------------------------
+lattice custom 7.160         a1 1.0 0.0 0.0         a2 0.0 1.0 0.0         a3 0.0 0.0 1.0         basis 0.0   0.0   0.0           basis 0.25  0.25  0.25          basis 0.0   0.5   0.5           basis 0.25  0.75  0.75          basis 0.5   0.0   0.5           basis 0.75  0.25  0.75          basis 0.5   0.5   0.0           basis 0.75  0.75  0.25          basis 0.125 0.125 0.125         basis 0.125 0.625 0.625         basis 0.625 0.125 0.625         basis 0.625 0.625 0.125         basis 0.375 0.375 0.125         basis 0.375 0.875 0.625         basis 0.875 0.375 0.625         basis 0.875 0.875 0.125         basis 0.125 0.375 0.375         basis 0.125 0.875 0.875         basis 0.625 0.375 0.875         basis 0.625 0.875 0.375         basis 0.375 0.125 0.375         basis 0.375 0.625 0.875         basis 0.875 0.125 0.875         basis 0.875 0.625 0.375
+Lattice spacing in x,y,z = 7.16 7.16 7.16
+
+# ====================================================================
+# 1. SISTEM KECIL (192 ATOM) - Untuk Gambar 3
+# ====================================================================
+region          reg_kecil block 0 2 0 2 0 2
+create_box      2 reg_kecil
+Created orthogonal box = (0 0 0) to (14.32 14.32 14.32)
+  1 by 1 by 1 MPI processor grid
+
+# Mengisi kotak dengan default tipe 1 (Si). Basis 9-24 ditimpa menjadi tipe 2 (O)
+create_atoms    1 region reg_kecil                 basis 9 2 basis 10 2 basis 11 2 basis 12 2                 basis 13 2 basis 14 2 basis 15 2 basis 16 2                 basis 17 2 basis 18 2 basis 19 2 basis 20 2                 basis 21 2 basis 22 2 basis 23 2 basis 24 2
+Created 192 atoms
+  using lattice units in orthogonal box = (0 0 0) to (14.32 14.32 14.32)
+  create_atoms CPU = 0.000 seconds
+
+mass            1 28.0855  # Si
+mass            2 15.9994  # O
+
+write_data      cristobalite_192.data
+System init for write_data ...
+WARNING: Communication cutoff is 0.0. No ghost atoms will be generated. Atoms may get lost. (src/comm_brick.cpp:210)
+
+# Bersihkan memori untuk membuat sistem berikutnya
+clear
+  using 1 OpenMP thread(s) per MPI task
+
+# ====================================================================
+# 2. SISTEM BESAR (1536 ATOM) - Untuk Gambar 2 & 7
+# ====================================================================
+units           real
+atom_style      charge
+boundary        p p p
+
+lattice custom 7.160         a1 1.0 0.0 0.0         a2 0.0 1.0 0.0         a3 0.0 0.0 1.0         basis 0.0   0.0   0.0           basis 0.25  0.25  0.25          basis 0.0   0.5   0.5           basis 0.25  0.75  0.75          basis 0.5   0.0   0.5           basis 0.75  0.25  0.75          basis 0.5   0.5   0.0           basis 0.75  0.75  0.25          basis 0.125 0.125 0.125         basis 0.125 0.625 0.625         basis 0.625 0.125 0.625         basis 0.625 0.625 0.125         basis 0.375 0.375 0.125         basis 0.375 0.875 0.625         basis 0.875 0.375 0.625         basis 0.875 0.875 0.125         basis 0.125 0.375 0.375         basis 0.125 0.875 0.875         basis 0.625 0.375 0.875         basis 0.625 0.875 0.375         basis 0.375 0.125 0.375         basis 0.375 0.625 0.875         basis 0.875 0.125 0.875         basis 0.875 0.625 0.375
+Lattice spacing in x,y,z = 7.16 7.16 7.16
+
+region          reg_besar block 0 4 0 4 0 4
+create_box      2 reg_besar
+Created orthogonal box = (0 0 0) to (28.64 28.64 28.64)
+  1 by 1 by 1 MPI processor grid
+
+# Cara yang sama untuk sistem besar
+create_atoms    1 region reg_besar                 basis 9 2 basis 10 2 basis 11 2 basis 12 2                 basis 13 2 basis 14 2 basis 15 2 basis 16 2                 basis 17 2 basis 18 2 basis 19 2 basis 20 2                 basis 21 2 basis 22 2 basis 23 2 basis 24 2
+Created 1536 atoms
+  using lattice units in orthogonal box = (0 0 0) to (28.64 28.64 28.64)
+  create_atoms CPU = 0.001 seconds
+
+mass            1 28.0855  # Si
+mass            2 15.9994  # O
+
+write_data      cristobalite_1536.data
+System init for write_data ...
+WARNING: Communication cutoff is 0.0. No ghost atoms will be generated. Atoms may get lost. (src/comm_brick.cpp:210)
+
+print "===================================================================="
+====================================================================
+print " Sukses! File cristobalite_192.data dan cristobalite_1536.data dibuat."
+ Sukses! File cristobalite_192.data dan cristobalite_1536.data dibuat.
+print "===================================================================="
+====================================================================
+Total wall time: 0:00:00

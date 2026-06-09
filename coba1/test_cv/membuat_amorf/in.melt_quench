@@ -1,0 +1,86 @@
+# ====================================================================
+# SKRIP LAMMPS: TAHAP 1 - MELT QUENCHING SILIKA (REAXFF)
+# ====================================================================
+
+units           real
+atom_style      charge
+boundary        p p p
+
+# --------------------------------------------------------------------
+# 1. BACA STRUKTUR AWAL
+# --------------------------------------------------------------------
+read_data       ../struktur/cristobalite_1536.data
+
+# Re-assign jenis atom sesuai format potensial ReaxFF
+# Tipe 1 = Si, tipe 2 = O
+pair_style      reaxff NULL checkqeq yes
+pair_coeff      * * ../potensial/ffield.reax.SiOH Si O
+
+# --------------------------------------------------------------------
+# 2. PENGATURAN SIMULASI & THERMOSTAT
+# --------------------------------------------------------------------
+neighbor        2.5 bin
+neigh_modify    delay 0 every 1 check yes
+
+# Timestep ReaxFF = 0.5 femtosekon
+timestep        0.5
+
+thermo          1000
+thermo_style    custom step temp pe ke etotal press vol density
+
+fix             f_qeq all qeq/reaxff 1 0.0 10.0 1.0e-6 reaxff
+
+# Set dump di awal agar SELURUH proses (melt + quench) terekam untuk analisis
+dump            d_trajectory all custom 2000 trajectory_amorf.lammpstrj id type x y z q
+
+# --------------------------------------------------------------------
+# 3. PROSES A: ELEVASI & PELELEHAN (MELTING) TO 5500 K
+# --------------------------------------------------------------------
+print "====================================================="
+print " Memulai Fase Pelelehan (Melting) ke 5500 K..."
+print "====================================================="
+
+# Elevasi suhu 300 K -> 5500 K selama 100,000 step (50 ps)
+fix             f_md all npt temp 300.0 5500.0 50.0 iso 1.0 1.0 500.0
+run             100000
+unfix           f_md
+
+# Tahan suhu 5500 K selama 600,000 step (300 ps) 
+# Waktu ditahan lebih lama agar long-range order kristal benar-benar hancur
+print " Menahan di 5500 K (300 ps) untuk menghancurkan memori kristal..."
+fix             f_melt all npt temp 5500.0 5500.0 50.0 iso 1.0 1.0 500.0
+run             600000
+unfix           f_melt
+
+# --------------------------------------------------------------------
+# 4. PROSES B: PENDINGINAN CEPAT (QUENCHING) TO 300 K
+# --------------------------------------------------------------------
+print "====================================================="
+print " Memulai Fase Pendinginan Cepat (Quenching) ke 300 K..."
+print "====================================================="
+
+# Quench dari 5500 K -> 300 K dalam 200,000 step (100 ps)
+# Cooling rate = 52 K/ps
+fix             f_quench all npt temp 5500.0 300.0 50.0 iso 1.0 1.0 500.0
+run             200000
+unfix           f_quench
+
+# --------------------------------------------------------------------
+# 5. PROSES C: EKUILIBRASI AKHIR DI SUHU TARGET (300 K)
+# --------------------------------------------------------------------
+print "====================================================="
+print " Memulai Fase Ekuilibrasi Akhir di 300 K..."
+print "====================================================="
+
+# Ekuilibrasi struktur amorf di 300 K selama 100,000 step (50 ps)
+fix             f_eq all npt temp 300.0 300.0 50.0 iso 1.0 1.0 500.0
+run             100000
+unfix           f_eq
+
+# --------------------------------------------------------------------
+# 6. SIMPAN RESTRUKTURISASI AMORF
+# --------------------------------------------------------------------
+write_data      amorphous_silica_300K.data
+print "====================================================="
+print " Selesai! File amorphous_silica_300K.data telah disimpan."
+print "====================================================="

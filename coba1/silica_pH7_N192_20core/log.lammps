@@ -1,0 +1,23 @@
+LAMMPS (29 Aug 2024 - Update 1)
+  using 1 OpenMP thread(s) per MPI task
+# Stage 05: PLUMED well-tempered metadynamics, fixed ordering.
+# IMPORTANT FIX: fix plumed is defined BEFORE fix npt prod. This prevents:
+#   ERROR: Fix plumed must be defined before any other fixes that compute pressure internally.
+# This file uses stock Local-Q6 on the Si sublattice as a practical fallback.
+# Niu et al.-style XRD/Debye WTMetaD requires a custom PLUMED action that is not stock PLUMED.
+
+clear
+  using 1 OpenMP thread(s) per MPI task
+units           real
+atom_style      charge
+boundary        p p p
+newton          on
+
+variable        dt         equal 0.25
+variable        rundir     string runs/${phlabel}_N${baseatoms}/05_wtmetad_plumed
+variable        rundir     string runs/pH7p0_N${baseatoms}/05_wtmetad_plumed
+variable        rundir     string runs/pH7p0_N192/05_wtmetad_plumed
+shell           mkdir -p ${rundir}
+shell           mkdir -p runs/pH7p0_N192/05_wtmetad_plumed
+log             ${rundir}/log.lammps
+log             runs/pH7p0_N192/05_wtmetad_plumed/log.lammps

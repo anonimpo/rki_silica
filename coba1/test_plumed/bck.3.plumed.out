@@ -1,0 +1,40 @@
+PLUMED: PLUMED is starting
+PLUMED: Version: 2.10.0 (git: Unknown) compiled on Jun  2 2026 at 14:59:43
+PLUMED: Please cite these papers when using PLUMED [1][2]
+PLUMED: For further information see the PLUMED web page at http://www.plumed.org
+PLUMED: Root: /opt/plumed/lib/plumed
+PLUMED: LibraryPath: /opt/plumed/lib/libplumedKernel.so
+PLUMED: For installed feature, see /opt/plumed/lib/plumed/src/config/config.txt
+PLUMED: Molecular dynamics engine: LAMMPS
+PLUMED: Precision of reals: 8
+PLUMED: Running over 1 node
+PLUMED: Number of threads: 1
+PLUMED: Cache line size: 512
+PLUMED: Number of atoms: 108
+PLUMED: File suffix: 
+PLUMED: FILE: plumed.dat
+PLUMED: Action DISTANCE_MATRIX
+PLUMED:   with label mat
+PLUMED:   atoms in GROUP 1 2 3 4 5 6 7 8 9 10 
+PLUMED:   Bibliography [3]
+PLUMED:   weight is distance between atoms 
+PLUMED:   with arguments : 
+PLUMED:    matrix with label mat 
+PLUMED: Action CUSTOM
+PLUMED:   with label cust
+PLUMED:   with arguments : 
+PLUMED:    scalar with label sm 
+PLUMED:   with function : x*2
+PLUMED:   with variables : x
+PLUMED:   function as parsed by lepton: 2*(x)
+PLUMED:   derivatives as computed by lepton:
+PLUMED:     2
+PLUMED:   not calculating when all arguments are zero 
+PLUMED: ERROR in input to action CUSTOM_SCALAR with label cust : cannot understand the following words from the input line : DERIV=2 
+PLUMED:  
+PLUMED: 
+PLUMED: ################################################################################
+PLUMED: 
+PLUMED: (core/Action.cpp:375) void PLMD::Action::error(const std::string&) const
+PLUMED: ERROR in input to action CUSTOM_SCALAR with label cust : cannot understand the following words from the input line : DERIV=2
+PLUMED: ################################################################################

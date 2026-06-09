@@ -1,0 +1,244 @@
+PLUMED: PLUMED is starting
+PLUMED: Version: 2.10.0 (git: Unknown) compiled on Jun  2 2026 at 14:59:43
+PLUMED: Please cite these papers when using PLUMED [1][2]
+PLUMED: For further information see the PLUMED web page at http://www.plumed.org
+PLUMED: Root: /opt/plumed/lib/plumed
+PLUMED: LibraryPath: /opt/plumed/lib/libplumedKernel.so
+PLUMED: For installed feature, see /opt/plumed/lib/plumed/src/config/config.txt
+PLUMED: Molecular dynamics engine: LAMMPS
+PLUMED: Precision of reals: 8
+PLUMED: Running over 1 node
+PLUMED: Number of threads: 1
+PLUMED: Cache line size: 512
+PLUMED: Number of atoms: 108
+PLUMED: File suffix: 
+PLUMED: FILE: plumed.dat
+PLUMED: Action DISTANCE_MATRIX
+PLUMED:   with label mat
+PLUMED:   atoms in GROUP 1 2 3 4 5 6 7 8 9 10 
+PLUMED:   Bibliography [3]
+PLUMED:   weight is distance between atoms 
+PLUMED:   with arguments : 
+PLUMED:    matrix with label mat 
+PLUMED: Action CUSTOM
+PLUMED:   with label cust
+PLUMED:   with arguments : 
+PLUMED:    scalar with label sm 
+PLUMED:   with function : x*2
+PLUMED:   with variables : x
+PLUMED:   function as parsed by lepton: 2*(x)
+PLUMED:   derivatives as computed by lepton:
+PLUMED:     2
+PLUMED:   not calculating when all arguments are zero 
+PLUMED: Action Q6
+PLUMED:   with label q6
+PLUMED: Action GROUP
+PLUMED:   with label q6_grp
+PLUMED:   list of atoms:
+PLUMED:  1 2 3 4 5 6 7 8 9 10
+PLUMED: Action CONTACT_MATRIX
+PLUMED:   with label q6_mat
+PLUMED: Action CONTACT_MATRIX_PROPER
+PLUMED:   with label q6_mat
+PLUMED:   atoms in GROUP 1 2 3 4 5 6 7 8 9 10 
+PLUMED:   added component to this action:  q6_mat.w 
+PLUMED:   added component to this action:  q6_mat.x 
+PLUMED:   added component to this action:  q6_mat.y 
+PLUMED:   added component to this action:  q6_mat.z 
+PLUMED:   Bibliography [3]
+PLUMED:   switching function cutoff is 0.3.  Using rational switching function with parameters d0=0 nn=6 mm=12 
+PLUMED: Action SPHERICAL_HARMONIC
+PLUMED:   with label q6_sh
+PLUMED:   with arguments : 
+PLUMED:    matrix with label q6_mat.x 
+PLUMED:    matrix with label q6_mat.y 
+PLUMED:    matrix with label q6_mat.z 
+PLUMED:    matrix with label q6_mat.w 
+PLUMED:   calculating 6th order spherical harmonic with q6_mat.x, q6_mat.y and q6_mat.z as input 
+PLUMED:   multiplying cylindrical harmonic by weight from q6_mat.w 
+PLUMED:   added component to this action:  q6_sh.rm-n6 
+PLUMED:   added component to this action:  q6_sh.rm-n5 
+PLUMED:   added component to this action:  q6_sh.rm-n4 
+PLUMED:   added component to this action:  q6_sh.rm-n3 
+PLUMED:   added component to this action:  q6_sh.rm-n2 
+PLUMED:   added component to this action:  q6_sh.rm-n1 
+PLUMED:   added component to this action:  q6_sh.rm-0 
+PLUMED:   added component to this action:  q6_sh.rm-p1 
+PLUMED:   added component to this action:  q6_sh.rm-p2 
+PLUMED:   added component to this action:  q6_sh.rm-p3 
+PLUMED:   added component to this action:  q6_sh.rm-p4 
+PLUMED:   added component to this action:  q6_sh.rm-p5 
+PLUMED:   added component to this action:  q6_sh.rm-p6 
+PLUMED:   added component to this action:  q6_sh.im-n6 
+PLUMED:   added component to this action:  q6_sh.im-n5 
+PLUMED:   added component to this action:  q6_sh.im-n4 
+PLUMED:   added component to this action:  q6_sh.im-n3 
+PLUMED:   added component to this action:  q6_sh.im-n2 
+PLUMED:   added component to this action:  q6_sh.im-n1 
+PLUMED:   added component to this action:  q6_sh.im-0 
+PLUMED:   added component to this action:  q6_sh.im-p1 
+PLUMED:   added component to this action:  q6_sh.im-p2 
+PLUMED:   added component to this action:  q6_sh.im-p3 
+PLUMED:   added component to this action:  q6_sh.im-p4 
+PLUMED:   added component to this action:  q6_sh.im-p5 
+PLUMED:   added component to this action:  q6_sh.im-p6 
+PLUMED: Action ONES
+PLUMED:   with label q6_denom_ones
+PLUMED: Action CONSTANT
+PLUMED:   with label q6_denom_ones
+PLUMED:   read in 10 values :
+PLUMED: Action MATRIX_VECTOR_PRODUCT
+PLUMED:   with label q6_denom
+PLUMED:   with arguments : 
+PLUMED:    matrix with label q6_mat.w 
+PLUMED:    vector with label q6_denom_ones 
+PLUMED: Action MATRIX_VECTOR_PRODUCT
+PLUMED:   with label q6_sp
+PLUMED:   with arguments : 
+PLUMED:    matrix with label q6_sh.rm-n6 
+PLUMED:    matrix with label q6_sh.rm-n5 
+PLUMED:    matrix with label q6_sh.rm-n4 
+PLUMED:    matrix with label q6_sh.rm-n3 
+PLUMED:    matrix with label q6_sh.rm-n2 
+PLUMED:    matrix with label q6_sh.rm-n1 
+PLUMED:    matrix with label q6_sh.rm-0 
+PLUMED:    matrix with label q6_sh.rm-p1 
+PLUMED:    matrix with label q6_sh.rm-p2 
+PLUMED:    matrix with label q6_sh.rm-p3 
+PLUMED:    matrix with label q6_sh.rm-p4 
+PLUMED:    matrix with label q6_sh.rm-p5 
+PLUMED:    matrix with label q6_sh.rm-p6 
+PLUMED:    matrix with label q6_sh.im-n6 
+PLUMED:    matrix with label q6_sh.im-n5 
+PLUMED:    matrix with label q6_sh.im-n4 
+PLUMED:    matrix with label q6_sh.im-n3 
+PLUMED:    matrix with label q6_sh.im-n2 
+PLUMED:    matrix with label q6_sh.im-n1 
+PLUMED:    matrix with label q6_sh.im-0 
+PLUMED:    matrix with label q6_sh.im-p1 
+PLUMED:    matrix with label q6_sh.im-p2 
+PLUMED:    matrix with label q6_sh.im-p3 
+PLUMED:    matrix with label q6_sh.im-p4 
+PLUMED:    matrix with label q6_sh.im-p5 
+PLUMED:    matrix with label q6_sh.im-p6 
+PLUMED:    vector with label q6_denom_ones 
+PLUMED:   added component to this action:  q6_sp.rm-n6 
+PLUMED:   added component to this action:  q6_sp.rm-n5 
+PLUMED:   added component to this action:  q6_sp.rm-n4 
+PLUMED:   added component to this action:  q6_sp.rm-n3 
+PLUMED:   added component to this action:  q6_sp.rm-n2 
+PLUMED:   added component to this action:  q6_sp.rm-n1 
+PLUMED:   added component to this action:  q6_sp.rm-0 
+PLUMED:   added component to this action:  q6_sp.rm-p1 
+PLUMED:   added component to this action:  q6_sp.rm-p2 
+PLUMED:   added component to this action:  q6_sp.rm-p3 
+PLUMED:   added component to this action:  q6_sp.rm-p4 
+PLUMED:   added component to this action:  q6_sp.rm-p5 
+PLUMED:   added component to this action:  q6_sp.rm-p6 
+PLUMED:   added component to this action:  q6_sp.im-n6 
+PLUMED:   added component to this action:  q6_sp.im-n5 
+PLUMED:   added component to this action:  q6_sp.im-n4 
+PLUMED:   added component to this action:  q6_sp.im-n3 
+PLUMED:   added component to this action:  q6_sp.im-n2 
+PLUMED:   added component to this action:  q6_sp.im-n1 
+PLUMED:   added component to this action:  q6_sp.im-0 
+PLUMED:   added component to this action:  q6_sp.im-p1 
+PLUMED:   added component to this action:  q6_sp.im-p2 
+PLUMED:   added component to this action:  q6_sp.im-p3 
+PLUMED:   added component to this action:  q6_sp.im-p4 
+PLUMED:   added component to this action:  q6_sp.im-p5 
+PLUMED:   added component to this action:  q6_sp.im-p6 
+PLUMED: Action COMBINE
+PLUMED:   with label q6_norm2
+PLUMED:   with arguments : 
+PLUMED:    vector with label q6_sp.rm-n6 
+PLUMED:    vector with label q6_sp.im-n6 
+PLUMED:    vector with label q6_sp.rm-n5 
+PLUMED:    vector with label q6_sp.im-n5 
+PLUMED:    vector with label q6_sp.rm-n4 
+PLUMED:    vector with label q6_sp.im-n4 
+PLUMED:    vector with label q6_sp.rm-n3 
+PLUMED:    vector with label q6_sp.im-n3 
+PLUMED:    vector with label q6_sp.rm-n2 
+PLUMED:    vector with label q6_sp.im-n2 
+PLUMED:    vector with label q6_sp.rm-n1 
+PLUMED:    vector with label q6_sp.im-n1 
+PLUMED:    vector with label q6_sp.rm-0 
+PLUMED:    vector with label q6_sp.im-0 
+PLUMED:    vector with label q6_sp.rm-p1 
+PLUMED:    vector with label q6_sp.im-p1 
+PLUMED:    vector with label q6_sp.rm-p2 
+PLUMED:    vector with label q6_sp.im-p2 
+PLUMED:    vector with label q6_sp.rm-p3 
+PLUMED:    vector with label q6_sp.im-p3 
+PLUMED:    vector with label q6_sp.rm-p4 
+PLUMED:    vector with label q6_sp.im-p4 
+PLUMED:    vector with label q6_sp.rm-p5 
+PLUMED:    vector with label q6_sp.im-p5 
+PLUMED:    vector with label q6_sp.rm-p6 
+PLUMED:    vector with label q6_sp.im-p6 
+PLUMED:   with coefficients: 1.000000 1.000000 1.000000 1.000000 1.000000 1.000000 1.000000 1.000000 1.000000 1.000000 1.000000 1.000000 1.000000 1.000000 1.000000 1.000000 1.000000 1.000000 1.000000 1.000000 1.000000 1.000000 1.000000 1.000000 1.000000 1.000000
+PLUMED:   with parameters: 0.000000 0.000000 0.000000 0.000000 0.000000 0.000000 0.000000 0.000000 0.000000 0.000000 0.000000 0.000000 0.000000 0.000000 0.000000 0.000000 0.000000 0.000000 0.000000 0.000000 0.000000 0.000000 0.000000 0.000000 0.000000 0.000000
+PLUMED:   and powers: 2.000000 2.000000 2.000000 2.000000 2.000000 2.000000 2.000000 2.000000 2.000000 2.000000 2.000000 2.000000 2.000000 2.000000 2.000000 2.000000 2.000000 2.000000 2.000000 2.000000 2.000000 2.000000 2.000000 2.000000 2.000000 2.000000
+PLUMED: Action CUSTOM
+PLUMED:   with label q6_norm
+PLUMED:   with arguments : 
+PLUMED:    vector with label q6_norm2 
+PLUMED:   with function : sqrt(x)
+PLUMED:   with variables : x
+PLUMED:   function as parsed by lepton: sqrt(x)
+PLUMED:   derivatives as computed by lepton:
+PLUMED:     0.5*(recip(sqrt(x)))
+PLUMED:   not calculating when all arguments are zero 
+PLUMED: Action CUSTOM
+PLUMED:   with label q6
+PLUMED:   with arguments : 
+PLUMED:    vector with label q6_norm 
+PLUMED:    vector with label q6_denom 
+PLUMED:   with function : x/y
+PLUMED:   with variables : x y
+PLUMED:   function as parsed by lepton: (x)/(y)
+PLUMED:   derivatives as computed by lepton:
+PLUMED:     (y)/(square(y))
+PLUMED:     -((x)/(square(y)))
+PLUMED: Action MEAN
+PLUMED:   with label q6_mean
+PLUMED:   with arguments : 
+PLUMED:    vector with label q6 
+PLUMED: Action METAD
+PLUMED:   with label metad
+PLUMED:   with arguments : 
+PLUMED:    scalar with label cust 
+PLUMED:   added component to this action:  metad.bias 
+PLUMED:   Gaussian width  0.200000  Gaussian height 1.200000
+PLUMED:   Gaussian deposition pace 500
+PLUMED:   Gaussian file HILLS
+PLUMED:   Bibliography [4]
+PLUMED: Action PRINT
+PLUMED:   with label @23
+PLUMED:   with stride 10
+PLUMED:   with arguments : 
+PLUMED:    scalar with label sm 
+PLUMED:    scalar with label cust 
+PLUMED:    scalar with label q6_mean 
+PLUMED:   on file colvar.dat
+PLUMED:   with format  %f
+PLUMED: END FILE: plumed.dat
+PLUMED: Timestep: 0.001000
+PLUMED: KbT has not been set by the MD engine
+PLUMED: It should be set by hand where needed
+PLUMED: Relevant bibliography:
+PLUMED:   [1] The PLUMED consortium, Nat. Methods 16, 670 (2019)
+PLUMED:   [2] Tribello, Bonomi, Branduardi, Camilloni, and Bussi, Comput. Phys. Commun. 185, 604 (2014)
+PLUMED:   [3] Tribello, Giberti, Sosso, Salvalaglio and Parrinello, J. Chem. Theory Comput. 13, 1317 (2017)
+PLUMED:   [4] Laio and Parrinello, PNAS 99, 12562 (2002)
+PLUMED: Please read and cite where appropriate!
+PLUMED: Finished setup
+PLUMED:                                               Cycles        Total      Average      Minimum      Maximum
+PLUMED:                                                    1     0.004242     0.004242     0.004242     0.004242
+PLUMED: 1 Prepare dependencies                             3     0.000008     0.000003     0.000001     0.000006
+PLUMED: 2 Sharing data                                     3     0.000058     0.000019     0.000002     0.000048
+PLUMED: 3 Waiting for data                                 3     0.000044     0.000015     0.000002     0.000035
+PLUMED: 4 Calculating (forward loop)                       3     0.000357     0.000119     0.000052     0.000252
+PLUMED: 5 Applying (backward loop)                         3     0.000020     0.000007     0.000003     0.000012
+PLUMED: 6 Update                                           3     0.000040     0.000013     0.000001     0.000037

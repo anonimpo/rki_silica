@@ -1,0 +1,39 @@
+# Stage 01: minimization of pH 7 hydrated silica precursor, base SiO2 = 192 atoms.
+# Run from project root:
+#   lmp -var phlabel pH7p0 -var baseatoms 192 -in kode_lammps/in.01_minimize_precursor
+
+clear
+units           real
+atom_style      charge
+boundary        p p p
+newton          on
+
+variable        dt        equal 0.25
+variable        rundir    string runs/${phlabel}_N${baseatoms}/01_minimize
+shell           mkdir -p ${rundir}
+log             ${rundir}/log.lammps
+
+read_data       kode_lammps/structures/precursor_${phlabel}_N${baseatoms}.data
+
+pair_style      reaxff NULL safezone 2.0 mincap 100
+pair_coeff      * * kode_lammps/potentials/ffield.reax.SiOH Si O H
+neighbor        2.0 bin
+neigh_modify    every 10 delay 0 check yes
+fix             qeq all qeq/reaxff 1 0.0 10.0 1.0e-6 reaxff maxiter 200
+
+timestep        ${dt}
+thermo          100
+thermo_style    custom step time temp press pe ke etotal vol density
+thermo_modify   flush yes lost warn
+
+dump            dmp all custom 500 ${rundir}/minimize.lammpstrj id type q x y z
+dump_modify     dmp sort id
+
+min_style       cg
+min_modify      dmax 0.05 line quadratic
+minimize        1.0e-5 1.0e-7 2000 20000
+
+write_data      ${rundir}/minimized.data
+write_restart   ${rundir}/minimized.restart
+unfix           qeq
+undump          dmp

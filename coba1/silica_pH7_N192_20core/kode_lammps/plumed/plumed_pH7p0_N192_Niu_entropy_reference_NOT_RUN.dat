@@ -1,0 +1,23 @@
+# Reference only: Niu/Piaggi/Parrinello local entropy fingerprint style.
+# This uses PAIRENTROPIES/LOCAL_AVERAGE, which is not available in many stock PLUMED builds.
+# Do not use this unless your PLUMED build contains these actions.
+# For N192 silica base, Si atoms are 1-64. MAXR=0.75 nm and SIGMA=0.05 nm follow the supporting information.
+
+UNITS LENGTH=nm TIME=ps ENERGY=kj/mol
+
+PAIRENTROPIES ...
+LABEL=s1
+SPECIES=1-64
+MAXR=0.75
+SIGMA=0.05
+NHIST=201
+LOWMEM
+... PAIRENTROPIES
+
+LOCAL_AVERAGE SPECIES=s1 SWITCH={RATIONAL R_0=0.425 D_MAX=0.45 NN=50 MM=100} LOWMEM LABEL=sa
+hh1: HISTOGRAM DATA=s1 GRID_MIN=-10.0 GRID_MAX=0.0 GRID_BIN=1000 BANDWIDTH=0.05 STRIDE=1000
+DUMPGRID GRID=hh1 FILE=runs/pH7p0_N192/05_wtmetad_plumed/histo1 STRIDE=1000
+hh2: HISTOGRAM DATA=sa GRID_MIN=-10.0 GRID_MAX=0.0 GRID_BIN=1000 BANDWIDTH=0.05 STRIDE=1000
+DUMPGRID GRID=hh2 FILE=runs/pH7p0_N192/05_wtmetad_plumed/histo2 STRIDE=1000
+DUMPMULTICOLVAR FILE=runs/pH7p0_N192/05_wtmetad_plumed/MULTICOLVAR-AVG.xyz STRIDE=1000 DATA=sa
+PRINT STRIDE=1000 ARG=* FILE=runs/pH7p0_N192/05_wtmetad_plumed/COLVAR_entropy

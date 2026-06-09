@@ -1,0 +1,43 @@
+# Inisialisasi sistem dummy
+units           metal
+atom_style      atomic
+dimension       3
+boundary        p p p
+
+print "=================================================="
+print "Memulai pengecekan komponen PLUMED dalam LAMMPS..."
+print "=================================================="
+
+# Membuat box simulasi kecil dan mengisinya dengan beberapa atom
+lattice         fcc 4.05
+region          box block 0 3 0 3 0 3
+create_box      1 box
+create_atoms    1 box
+
+# --- PERBAIKAN LAMMPS: Menentukan massa atom tipe 1 ---
+mass            1 26.98  # Menggunakan massa dummy (misal: Aluminium)
+
+# Menentukan potensial dummy (Lennard-Jones) agar LAMMPS tidak error
+pair_style      lj/cut 2.5
+pair_coeff      1 1 1.0 1.0 2.5
+
+# Pengaturan termodinamika singkat
+neighbor        0.3 bin
+neigh_modify    delay 0 every 1 check yes
+fix             1 all nve
+
+print "Menghubungkan ke file plumed.dat..."
+fix             2 all plumed plumedfile plumed.dat outfile plumed.out
+
+# Jalankan 1-2 langkah saja untuk mengecek kestabilan
+timestep        0.001
+thermo          1
+
+print "Menjalankan run dummy untuk tes kestabilan fitur..."
+run             2
+
+print "=================================================="
+print "Pengecekan selesai! Jika tidak ada error di atas,"
+print "artinya Q6, METAD, DISTANCE_MATRIX, CUSTOM, dan"
+print "SUM_MATRIX didukung oleh versi PLUMED Anda."
+print "=================================================="

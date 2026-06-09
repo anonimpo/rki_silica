@@ -1,0 +1,205 @@
+LAMMPS (29 Aug 2024 - Update 1)
+  using 1 OpenMP thread(s) per MPI task
+# SKRIP LAMMPS: FINGERPRINT UNTUK FASE KRISTAL MURNI
+units           real
+atom_style      charge
+boundary        p p p
+
+read_data       ../struktur/cristobalite_1536.data
+Reading data file ...
+  orthogonal box = (0 0 0) to (28.64 28.64 28.64)
+  2 by 2 by 2 MPI processor grid
+  reading atoms ...
+  1536 atoms
+  reading velocities ...
+  1536 velocities
+  read_data CPU = 0.006 seconds
+
+pair_style      reaxff NULL checkqeq yes
+pair_coeff      * * ../potensial/ffield.reax.SiOH Si O
+WARNING: Changed valency_val to valency_boc for X (src/REAXFF/reaxff_ffield.cpp:294)
+
+neighbor        2.5 bin
+neigh_modify    delay 0 every 1 check yes
+timestep        0.5
+
+thermo          1000
+thermo_style    custom step temp pe ke press
+
+fix             f_qeq all qeq/reaxff 1 0.0 10.0 1.0e-6 reaxff
+
+# Jalankan NVT singkat pada 2400 K agar struktur bergetar secara termal
+fix             f_nvt all nvt temp 2400.0 2400.0 50.0
+
+# Panggil PLUMED untuk menghitung distribusi
+fix             f_plumed all plumed plumedfile plumed.dat
+
+# ==========================================================
+# MENGHITUNG SPEKTRUM XRD
+# ==========================================================
+# 1.541838 adalah panjang gelombang sinar-X (Target Cu K-alpha)
+# 1 2 adalah tipe atom (1 untuk Si, 2 untuk O)
+# 2Theta 10 90 adalah rentang sudut (dari 10 hingga 90 derajat)
+# c 1 1 1 adalah kerapatan grid reciprocal space (bisa dinaikkan jika kurang presisi, misal c 2 2 2)
+# LP 1 berarti menyalakan faktor koreksi Lorentz-Polarization (seperti XRD asli)
+
+#compute         myXRD all xrd 1.541838 1 2 2Theta 10 90 c 1 1 1 LP 1
+compute         myXRD all xrd 1.541838 Si O 2Theta 10 90 c 1 1 1 LP 1
+# Menyimpan hasil XRD ke dalam file teks (spektrum_xrd.txt)
+# Data akan dirata-rata selama 50000 step
+fix             outXRD all ave/time 100 500 50000 c_myXRD[1] c_myXRD[2] file spektrum_xrd.txt mode vector
+# Jalankan selama 50.000 step untuk mengumpulkan statistik histogram
+run             50000
+
+CITE-CITE-CITE-CITE-CITE-CITE-CITE-CITE-CITE-CITE-CITE-CITE-CITE
+
+Your simulation uses code contributions which should be cited:
+
+- Type Label Framework: https://doi.org/10.1021/acs.jpcb.3c08419
+
+@Article{Gissinger24,
+ author = {Jacob R. Gissinger, Ilia Nikiforov, Yaser Afshar, Brendon Waters, Moon-ki Choi, Daniel S. Karls, Alexander Stukowski, Wonpil Im, Hendrik Heinz, Axel Kohlmeyer, and Ellad B. Tadmor},
+ title = {Type Label Framework for Bonded Force Fields in LAMMPS},
+ journal = {J. Phys. Chem. B},
+ year =    2024,
+ volume =  128,
+ number =  13,
+ pages =   {3282–-3297}
+}
+
+- pair reaxff command: doi:10.1016/j.parco.2011.08.005
+
+@Article{Aktulga12,
+ author = {H. M. Aktulga and J. C. Fogarty and S. A. Pandit and A. Y. Grama},
+ title = {Parallel Reactive Molecular Dynamics: {N}umerical Methods and Algorithmic Techniques},
+ journal = {Parallel Computing},
+ year =    2012,
+ volume =  38,
+ number =  {4--5},
+ pages =   {245--259}
+}
+
+- fix qeq/reaxff command: doi:10.1016/j.parco.2011.08.005
+
+@Article{Aktulga12,
+ author = {H. M. Aktulga and J. C. Fogarty and S. A. Pandit and A. Y. Grama},
+ title = {Parallel Reactive Molecular Dynamics: {N}umerical Methods and Algorithmic Techniques},
+ journal = {Parallel Computing},
+ year =    2012,
+ volume =  38,
+ pages =   {245--259}
+}
+
+- compute xrd command: doi:10.1088/0965-0393/21/5/055020
+
+@Article{Coleman13,
+ author = {S. P. Coleman and D. E. Spearot and L. Capolungo},
+ title = {Virtual Diffraction Analysis of {Ni} [010] Symmetric Tilt Grain Boundaries},
+ journal = {Modelling and Simulation in Materials Science and Engineering},
+ year =    2013,
+ volume =  21,
+ pages =   {055020}
+}
+
+CITE-CITE-CITE-CITE-CITE-CITE-CITE-CITE-CITE-CITE-CITE-CITE-CITE
+
+Neighbor list info ...
+  update: every = 1 steps, delay = 0 steps, check = yes
+  max neighbors/atom: 2000, page size: 100000
+  master list distance cutoff = 12.5
+  ghost atom cutoff = 12.5
+  binsize = 6.25, bins = 5 5 5
+  2 neighbor lists, perpetual/occasional/extra = 2 0 0
+  (1) pair reaxff, perpetual
+      attributes: half, newton off, ghost
+      pair build: half/bin/ghost/newtoff
+      stencil: full/ghost/bin/3d
+      bin: standard
+  (2) fix qeq/reaxff, perpetual, copy from (1)
+      attributes: half, newton off
+      pair build: copy
+      stencil: none
+      bin: none
+Per MPI rank memory allocation (min/avg/max) = -1.25e+04 | 267.4 | 1.629e+04 Mbytes
+   Step          Temp          PotEng         KinEng         Press     
+         0   0             -228792.02      0             -123439.5     
+      1000   1978.8189     -222386.29      9054.1719     -38221.441    
+      2000   2487.204      -219347.46      11380.31       7763.1709    
+      3000   2354.8147     -219805.57      10774.557     -14316.944    
+      4000   2359.4934     -220182.72      10795.964     -9544.3479    
+      5000   2464.732      -219828.75      11277.488     -16441.448    
+      6000   2531.1045     -220287.24      11581.179     -4428.0515    
+      7000   2444.5912     -220101.02      11185.333      9622.2598    
+      8000   2345.3777     -220019.83      10731.378     -1034.7404    
+      9000   2460.4017     -220093.49      11257.675     -11006.009    
+     10000   2371.1619     -219513.53      10849.354     -5547.6208    
+     11000   2431.2828     -220034.58      11124.44      -13252.357    
+     12000   2478.9217     -220051.19      11342.414     -7386.9279    
+     13000   2415.3529     -220113.17      11051.552     -1110.2605    
+     14000   2354.5561     -219990.07      10773.374     -10296.851    
+     15000   2399.0952     -220213.25      10977.164      2560.5859    
+     16000   2305.3969     -219511.5       10548.444      2129.6667    
+     17000   2380.2835     -219930.59      10891.09      -1961.1201    
+     18000   2306.8722     -219734.88      10555.194     -10598.338    
+     19000   2427.856      -219732.08      11108.76      -7976.9978    
+     20000   2400.3208     -219748.64      10982.772     -3250.8528    
+     21000   2402.341      -219858.15      10992.016     -813.49393    
+     22000   2418.1145     -219964.79      11064.188     -18259.772    
+     23000   2443.0574     -220160.69      11178.315     -15277.6      
+     24000   2377.1921     -219850.27      10876.946     -11416.321    
+     25000   2458.3837     -220168.57      11248.441     -9738.8978    
+     26000   2385.4561     -219730.51      10914.758      4222.8867    
+     27000   2439.8883     -219973.45      11163.815     -14793.981    
+     28000   2487.0885     -220070.88      11379.781      1010.2593    
+     29000   2403.4575     -219918.1       10997.124     -11991.632    
+     30000   2406.4252     -219932.91      11010.703     -9544.3363    
+     31000   2392.3506     -219515.3       10946.304     -7449.9375    
+     32000   2342.6187     -219815.97      10718.753     -9224.7249    
+     33000   2475.278      -219938.4       11325.742     -2867.6186    
+     34000   2358.7593     -220075.91      10792.606     -12115.312    
+     35000   2513.211      -220246.89      11499.306     -3867.3154    
+     36000   2387.1827     -219703.12      10922.658     -315.53849    
+     37000   2394.5225     -219956.12      10956.242     -6330.6988    
+     38000   2395.8846     -220400.26      10962.474     -15583.763    
+     39000   2402.2529     -219912.08      10991.613     -8380.1385    
+     40000   2373.2222     -219963.81      10858.781     -6884.4748    
+     41000   2435.3516     -219670.97      11143.057     -2621.1853    
+     42000   2329.409      -220105.58      10658.312     -14448.848    
+     43000   2328.007      -219867.31      10651.897     -5479.1178    
+     44000   2408.5714     -219661.73      11020.523     -1664.0488    
+     45000   2433.045      -219500.41      11132.503      251.54429    
+     46000   2397.8386     -220115.48      10971.415     -6222.3604    
+     47000   2443.2123     -220091.32      11179.024     -10338.823    
+     48000   2377.5731     -219830.44      10878.689     -13752.858    
+     49000   2381.8722     -220243.32      10898.36      -2979.5577    
+     50000   2330.13       -220408.81      10661.611     -7467.5247    
+Loop time of 2832.22 on 8 procs for 50000 steps with 1536 atoms
+
+Performance: 0.763 ns/day, 31.469 hours/ns, 17.654 timesteps/s, 27.117 katom-step/s
+98.2% CPU use with 8 MPI tasks x 1 OpenMP threads
+
+MPI task timing breakdown:
+Section |  min time  |  avg time  |  max time  |%varavg| %total
+---------------------------------------------------------------
+Pair    | 1309.5     | 1459.2     | 1588.6     | 226.1 | 51.52
+Neigh   | 15.615     | 15.814     | 16.124     |   3.8 |  0.56
+Comm    | 28.86      | 158.35     | 308.02     | 686.1 |  5.59
+Output  | 0.026416   | 0.087143   | 0.10054    |   7.8 |  0.00
+Modify  | 1196.9     | 1197.4     | 1197.7     |   0.7 | 42.28
+Other   |            | 1.318      |            |       |  0.05
+
+Nlocal:            192 ave         197 max         188 min
+Histogram: 2 0 1 0 1 1 2 0 0 1
+Nghost:        3774.75 ave        3801 max        3748 min
+Histogram: 1 0 1 2 0 0 2 0 1 1
+Neighs:        86229.5 ave       88511 max       84112 min
+Histogram: 2 0 0 1 0 2 1 1 0 1
+
+Total # of neighbors = 689836
+Ave neighs/atom = 449.11198
+Neighbor list builds = 709
+Dangerous builds = 0
+
+# Ubah nama file output agar tidak tertimpa di langkah berikutnya
+shell           mv histo2_q6avg data_fingerprint_kristal.txt
+Total wall time: 0:47:12

@@ -1,0 +1,51 @@
+# Stage 05: PLUMED well-tempered metadynamics, fixed ordering.
+# IMPORTANT FIX: fix plumed is defined BEFORE fix npt prod. This prevents:
+#   ERROR: Fix plumed must be defined before any other fixes that compute pressure internally.
+# This file uses stock Local-Q6 on the Si sublattice as a practical fallback.
+# Niu et al.-style XRD/Debye WTMetaD requires a custom PLUMED action that is not stock PLUMED.
+
+clear
+units           real
+atom_style      charge
+boundary        p p p
+newton          on
+
+variable        dt         equal 0.25
+variable        rundir     string runs/${phlabel}_N${baseatoms}/05_wtmetad_plumed
+shell           mkdir -p ${rundir}
+log             ${rundir}/log.lammps
+
+read_data       runs/${phlabel}_N${baseatoms}/03_calcination_1173K/calcined_1173K.data
+
+pair_style      reaxff NULL safezone 2.0 mincap 100
+pair_coeff      * * kode_lammps/potentials/ffield.reax.SiOH Si O H
+neighbor        2.0 bin
+neigh_modify    every 10 delay 0 check yes
+fix             qeq all qeq/reaxff 1 0.0 10.0 1.0e-6 reaxff maxiter 200
+
+timestep        ${dt}
+thermo          1000
+thermo_style    custom step time temp press pe ke etotal vol density
+thermo_modify   flush yes lost warn
+
+dump            dmp all custom 2000 ${rundir}/traj_wtmetad.lammpstrj id type q x y z vx vy vz
+dump_modify     dmp sort id
+fix             rb all reaxff/bonds 2000 ${rundir}/bonds.reaxff
+
+# Heating is unbiased; PLUMED starts only in production.
+fix             heat all npt temp 1173.0 ${Tprod} 100.0 iso 1.0 1.0 1000.0
+run             ${nheat}
+unfix           heat
+
+# Correct order: PLUMED first, then NPT production.
+fix             plm all plumed plumedfile ${plumedfile} outfile ${rundir}/plumed.log
+fix             prod all npt temp ${Tprod} ${Tprod} 100.0 iso 1.0 1.0 1000.0
+run             ${nmeta}
+unfix           prod
+unfix           plm
+
+write_data      ${rundir}/wtmetad_final.data
+write_restart   ${rundir}/wtmetad_final.restart
+unfix           rb
+unfix           qeq
+undump          dmp

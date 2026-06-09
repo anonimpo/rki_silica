@@ -1,0 +1,15 @@
+# PLUMED 2.10 check-only XRD-like CV for beta-cristobalite {111}.
+# Built from documented matrix/function actions: GROUP, DISTANCE_MATRIX, CUSTOM, SUM, PRINT.
+# This is a Si-only Debye-style CV. It is close to Niu's idea but not the full published CV
+# because it omits element-specific X-ray form factors and O contributions.
+# Units follow LAMMPS real: Angstrom, kcal/mol, fs.
+UNITS LENGTH=A ENERGY=kcal/mol TIME=fs
+
+si: GROUP ATOMS=1-512
+# Q111 = 2*pi/d111; d111 = a/sqrt(3), a=7.15 A, so Q111 ~ 1.522 A^-1.
+dm: DISTANCE_MATRIX GROUP=si CUTOFF=12.0 COMPONENTS
+xrdm: CUSTOM ARG=dm.w VAR=r FUNC=(sin(1.522*sqrt(r*r+1e-12))/(1.522*sqrt(r*r+1e-12)))*(sin(3.141592653589793*sqrt(r*r+1e-12)/12.0)/(3.141592653589793*sqrt(r*r+1e-12)/12.0))*step(12.0-r) PERIODIC=NO
+s1raw: SUM ARG=xrdm PERIODIC=NO
+s1: CUSTOM ARG=s1raw VAR=x FUNC=x/512.0 PERIODIC=NO
+
+PRINT STRIDE=100 ARG=s1 FILE=../outputs/COLVAR_XRD111_CHECK
